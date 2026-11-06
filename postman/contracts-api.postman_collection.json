@@ -1,6 +1,6 @@
 {
   "info": {
-    "name": "Contracts API - Semana 2",
+    "name": "Contracts API - Grupo 6",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "description": "Ejecutar en orden. La primera petición comprueba CORS para Angular en http://localhost:4200. Luego el login guarda el JWT. Clientes, contratos y las escrituras lo envían en Authorization. GET de planes y plantillas es público."
   },
