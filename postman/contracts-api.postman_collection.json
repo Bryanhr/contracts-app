@@ -1,9 +1,1863 @@
 {
   "info": {
+    "_postman_id": "43ef0e28-c4b0-479a-bbca-173a6f8cad1d",
     "name": "Contracts API - Grupo 6",
+    "description": "Ejecutar en orden. La primera petición comprueba CORS para Angular en http://localhost:4200. Luego el login guarda el JWT. Clientes, contratos y las escrituras lo envían en Authorization. GET de planes y plantillas es público.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "description": "Ejecutar en orden. La primera petición comprueba CORS para Angular en http://localhost:4200. Luego el login guarda el JWT. Clientes, contratos y las escrituras lo envían en Authorization. GET de planes y plantillas es público."
+    "_exporter_id": "27907028"
   },
+  "item": [
+    {
+      "name": "00 OPTIONS preflight Angular",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Allows the Angular origin\", () => pm.expect(pm.response.headers.get(\"Access-Control-Allow-Origin\")).to.eql(pm.collectionVariables.get(\"angularOrigin\")));",
+              "pm.test(\"Allows the Authorization header\", () => pm.expect(pm.response.headers.get(\"Access-Control-Allow-Headers\")).to.include(\"Authorization\"));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "OPTIONS",
+        "header": [
+          {
+            "key": "Origin",
+            "value": "{{angularOrigin}}"
+          },
+          {
+            "key": "Access-Control-Request-Method",
+            "value": "GET"
+          },
+          {
+            "key": "Access-Control-Request-Headers",
+            "value": "Authorization"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/customers",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "customers"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "00 POST login",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Returns a token\", () => pm.expect(body.token).to.be.a(\"string\").that.is.not.empty);",
+              "pm.collectionVariables.set(\"token\", body.token);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"admin@empresa.pe\",\n  \"password\": \"admin123\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "auth",
+            "login"
+          ]
+        },
+        "description": "Usuarios simulados: admin@empresa.pe / admin123, gerente@empresa.pe / gerente123, ventas1@empresa.pe / ventas123."
+      },
+      "response": []
+    },
+    {
+      "name": "35 POST login incorrecto",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Login rechazado\", () => pm.expect([400, 401]).to.include(pm.response.code));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer"
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"admin@empresa.pe\",\n  \"password\": \"dieguito\"\n}",
+          "options": {
+            "raw": {
+              "language": "text"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "auth",
+            "login"
+          ]
+        },
+        "description": "Usuarios simulados: admin@empresa.pe / admin123, gerente@empresa.pe / gerente123, ventas1@empresa.pe / ventas123."
+      },
+      "response": []
+    },
+    {
+      "name": "01 POST customer (valid)",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.set(\"ruc\", \"20\" + String(Date.now()).slice(-9));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+              "const c = pm.response.json();",
+              "pm.test(\"Has id and same RUC\", () => { pm.expect(c.id).to.be.a(\"number\"); pm.expect(c.ruc).to.eql(pm.collectionVariables.get(\"ruc\")); });",
+              "pm.collectionVariables.set(\"customerId\", c.id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"businessName\": \"Soporte Andino SAC\",\n  \"ruc\": \"{{ruc}}\",\n  \"representative\": \"Ana Torres\",\n  \"email\": \"contacto@soporteandino.pe\",\n  \"phone\": \"987654321\",\n  \"address\": \"Av. Arequipa 123, Lima\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/customers",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "customers"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "02 POST customer without RUC",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+              "pm.test(\"Problem detail names the ruc field\", () => { const body = pm.response.json(); pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/problem+json\"); pm.expect(body.status).to.eql(400); pm.expect(body.title).to.eql(\"Bad Request\"); pm.expect(body.detail).to.be.a(\"string\").that.is.not.empty; pm.expect(body.errors).to.have.property(\"ruc\"); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"businessName\": \"Sin RUC SAC\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/customers",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "customers"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "03 POST customer duplicated RUC",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+              "pm.test(\"Problem detail\", () => { const body = pm.response.json(); pm.expect(body.status).to.eql(409); pm.expect(body.title).to.eql(\"Conflict\"); pm.expect(body.detail).to.include(\"already exists\"); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"businessName\": \"Soporte Andino SAC\",\n  \"ruc\": \"{{ruc}}\",\n  \"representative\": \"Ana Torres\",\n  \"email\": \"contacto@soporteandino.pe\",\n  \"phone\": \"987654321\",\n  \"address\": \"Av. Arequipa 123, Lima\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/customers",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "customers"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "04 GET customers",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Returns a list\", () => pm.expect(pm.response.json()).to.be.an(\"array\").that.is.not.empty);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/customers",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "customers"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "04b GET customers by name",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Every name contains the search\", () => { const id = Number(pm.collectionVariables.get(\"customerId\")); const list = pm.response.json(); pm.expect(list.some(c => c.id === id)).to.eql(true); list.forEach(c => pm.expect(c.businessName.toLowerCase()).to.include(\"soporte andino\")); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/customers?search=Soporte Andino",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "customers"
+          ],
+          "query": [
+            {
+              "key": "search",
+              "value": "Soporte Andino"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "05 GET customer not found",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 404\", () => pm.response.to.have.status(404));",
+              "pm.test(\"Problem detail\", () => { const body = pm.response.json(); pm.expect(body.status).to.eql(404); pm.expect(body.title).to.eql(\"Not Found\"); pm.expect(body.detail).to.be.a(\"string\").that.is.not.empty; });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/customers/999999",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "customers",
+            "999999"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "06 POST plan (12 months)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+              "const p = pm.response.json();",
+              "pm.collectionVariables.set(\"planId\", p.id);",
+              "pm.test(\"Keeps duration\", () => pm.expect(p.durationMonths).to.eql(12));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Plan Básico {{$timestamp}}\",\n  \"responseTimeHours\": 24,\n  \"monthlyCost\": 350.0,\n  \"durationMonths\": 12\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/plans",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "plans"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "07 GET plan by id",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Same plan\", () => pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get(\"planId\"))));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/plans/{{planId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "plans",
+            "{{planId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "08 POST template",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+              "const t = pm.response.json();",
+              "pm.collectionVariables.set(\"templateId\", t.id);",
+              "pm.test(\"Linked to the plan and dated\", () => { pm.expect(t.planId).to.eql(Number(pm.collectionVariables.get(\"planId\"))); pm.expect(t.updatedAt).to.be.a(\"string\"); });",
+              "pm.test(\"Stores the document head\", () => pm.expect(t.content).to.include(\"# CONTRATO DE PRESTACIÓN DE SERVICIOS DE SOPORTE\"));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"planId\": {{planId}},\n  \"name\": \"Convenio Plan Básico {{$timestamp}}\",\n  \"content\": \"Se acuerda la prestación de soporte técnico según el plan contratado.\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/templates",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "templates"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "09 GET templates by plan",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Only that plan\", () => { const pid = Number(pm.collectionVariables.get(\"planId\")); const list = pm.response.json(); pm.expect(list).to.not.be.empty; list.forEach(t => pm.expect(t.planId).to.eql(pid)); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/templates?planId={{planId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "templates"
+          ],
+          "query": [
+            {
+              "key": "planId",
+              "value": "{{planId}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "10 POST contract (valid)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+              "const k = pm.response.json();",
+              "pm.collectionVariables.set(\"contractId\", k.id);",
+              "pm.test(\"Amount copied from plan\", () => pm.expect(Number(k.amount)).to.eql(350));",
+              "pm.test(\"End date = start + 12 months\", () => pm.expect(k.endDate).to.eql(\"2027-11-01\"));",
+              "pm.test(\"Starts GENERATED without validity\", () => { pm.expect(k.status).to.eql(\"GENERATED\"); pm.expect(k.validity).to.be.null; });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"customerId\": {{customerId}},\n  \"planId\": {{planId}},\n  \"startDate\": \"2026-11-01\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/contracts",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "contracts"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "11 POST contract with unknown plan",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 404\", () => pm.response.to.have.status(404));",
+              "pm.test(\"Problem detail\", () => { const body = pm.response.json(); pm.expect(body.status).to.eql(404); pm.expect(body.title).to.eql(\"Not Found\"); pm.expect(body.detail).to.be.a(\"string\").that.is.not.empty; });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"customerId\": {{customerId}},\n  \"planId\": 999999,\n  \"startDate\": \"2026-11-01\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/contracts",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "contracts"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "12 GET contracts by status",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"All GENERATED\", () => { const list = pm.response.json(); pm.expect(list).to.not.be.empty; list.forEach(k => pm.expect(k.status).to.eql(\"GENERATED\")); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/contracts?status=GENERATED",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "contracts"
+          ],
+          "query": [
+            {
+              "key": "status",
+              "value": "GENERATED"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "13 GET contract by id",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Includes calculated validity\", () => pm.expect(pm.response.json()).to.have.property(\"validity\"));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/contracts/{{contractId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "contracts",
+            "{{contractId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "14 GET customer by id",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Same customer\", () => pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get(\"customerId\"))));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/customers/{{customerId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "customers",
+            "{{customerId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "15 PUT customer",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Keeps the same RUC\", () => { const c = pm.response.json(); pm.expect(c.businessName).to.eql(\"Soporte Andino Actualizado SAC\"); pm.expect(c.ruc).to.eql(pm.collectionVariables.get(\"ruc\")); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"businessName\": \"Soporte Andino Actualizado SAC\",\n  \"ruc\": \"{{ruc}}\",\n  \"representative\": \"Ana Torres\",\n  \"email\": \"contacto@soporteandino.pe\",\n  \"phone\": \"987654321\",\n  \"address\": \"Av. Arequipa 123, Lima\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/customers/{{customerId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "customers",
+            "{{customerId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "16 GET plans",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Returns a list\", () => pm.expect(pm.response.json()).to.be.an(\"array\").that.is.not.empty);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/plans",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "plans"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "17 PUT plan",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Updates the monthly cost\", () => pm.expect(Number(pm.response.json().monthlyCost)).to.eql(400));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Plan Básico actualizado {{$timestamp}}\",\n  \"responseTimeHours\": 24,\n  \"monthlyCost\": 400.0,\n  \"durationMonths\": 12\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/plans/{{planId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "plans",
+            "{{planId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "18 PUT template",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Keeps the document around the new clause\", () => { const t = pm.response.json(); pm.expect(t.content).to.include(\"# CONTRATO DE PRESTACIÓN DE SERVICIOS DE SOPORTE\"); pm.expect(t.content).to.include(\"soporte técnico prioritario\"); pm.expect(t.content).to.include(\"## 3) Condiciones económicas y forma de pago.\"); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"planId\": {{planId}},\n  \"name\": \"Convenio actualizado {{$timestamp}}\",\n  \"content\": \"Se acuerda la prestación de soporte técnico prioritario según el plan contratado.\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/templates/{{templateId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "templates",
+            "{{templateId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "19 GET contracts by validity",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Unsigned contract is not active\", () => { const id = Number(pm.collectionVariables.get(\"contractId\")); const list = pm.response.json(); pm.expect(list.find(k => k.id === id)).to.eql(undefined); list.forEach(k => pm.expect(k.validity).to.eql(\"ACTIVE\")); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/contracts?validity=ACTIVE",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "contracts"
+          ],
+          "query": [
+            {
+              "key": "validity",
+              "value": "ACTIVE"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "20 PUT contract",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+              "const k = pm.response.json();",
+              "pm.test(\"Recalculates amount and end date\", () => { pm.expect(Number(k.amount)).to.eql(400); pm.expect(k.endDate).to.eql(\"2027-12-01\"); });",
+              "pm.test(\"Keeps GENERATED\", () => pm.expect(k.status).to.eql(\"GENERATED\"));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"customerId\": {{customerId}},\n  \"planId\": {{planId}},\n  \"startDate\": \"2026-12-01\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/contracts/{{contractId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "contracts",
+            "{{contractId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "21 GET contract pdf",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Returns a PDF\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/pdf\"));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/contracts/{{contractId}}/pdf",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "contracts",
+            "{{contractId}}",
+            "pdf"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "22 POST upload signed not pdf",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 415\", () => pm.response.to.have.status(415));\npm.test(\"Problem detail\", () => { const body = pm.response.json(); pm.expect(body.status).to.eql(415); pm.expect(body.title).to.eql(\"Unsupported Media Type\"); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "file",
+              "type": "file",
+              "contentType": "text/plain",
+              "src": [
+                "prueba (1).txt"
+              ]
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/contracts/{{contractId}}/upload-signed",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "contracts",
+            "{{contractId}}",
+            "upload-signed"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "29 GET pdf contrato inexistente",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 404\", () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/contracts/999999/pdf",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "contracts",
+            "999999",
+            "pdf"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "30 POST upload contrato inexistente",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 404\", () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "file",
+              "type": "file",
+              "contentType": "text/plain",
+              "src": [
+                "prueba.pdf"
+              ]
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/contracts/999999/upload-signed",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "contracts",
+            "999999",
+            "upload-signed"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "31 PUT customer invalido",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 400\", () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"businessName\": \"Cliente sin ruc\",\n  \"ruc\": \n  \"representative\": \"Ana Torres\",\n  \"email\": \"contacto@soporteandino.pe\",\n  \"phone\": \"987654321\",\n  \"address\": \"Av. Arequipa 123, Lima\"\n}",
+          "options": {
+            "raw": {
+              "language": "text"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/customers/{{customerId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "customers",
+            "{{customerId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "32 PUT customer inexistente",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 404\", () => pm.response.to.have.status(404));"
+            ]
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const ruc = \"20\" + String(Math.floor(Math.random() * 1e9)).padStart(9, \"0\");\r\npm.request.body.update(JSON.stringify({\r\n  businessName: \"Cliente inexistente SAC\",\r\n  ruc: ruc,\r\n  representative: \"Ana Torres\",\r\n  email: \"inexistente@correo.pe\",\r\n  phone: \"987654321\",\r\n  address: \"Av. Arequipa 123, Lima\"\r\n}));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"businessName\": \"Soporte Andino Actualizado SAC\",\n  \"ruc\": \"20999999991\",\n  \"representative\": \"Ana Torres\",\n  \"email\": \"contacto@soporteandino.pe\",\n  \"phone\": \"987654321\",\n  \"address\": \"Av. Arequipa 123, Lima\"\n}",
+          "options": {
+            "raw": {
+              "language": "text"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/customers/999999",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "customers",
+            "999999"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "33 GET customers sin token",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 401\", () => pm.response.to.have.status(401));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer"
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/customers",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "customers"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "34 GET customers token invalido",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 401\", () => pm.response.to.have.status(401));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "token.invalido.123",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/customers",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "customers"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "23 DELETE customer in use",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+              "pm.test(\"Problem detail\", () => { const body = pm.response.json(); pm.expect(body.status).to.eql(409); pm.expect(body.title).to.eql(\"Conflict\"); pm.expect(body.detail).to.include(\"has contracts\"); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/customers/{{customerId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "customers",
+            "{{customerId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "24 DELETE plan in use",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+              "pm.test(\"Problem detail\", () => { const body = pm.response.json(); pm.expect(body.status).to.eql(409); pm.expect(body.title).to.eql(\"Conflict\"); pm.expect(body.detail).to.include(\"used by\"); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/plans/{{planId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "plans",
+            "{{planId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "25 DELETE contract",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/contracts/{{contractId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "contracts",
+            "{{contractId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "26 DELETE template",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/templates/{{templateId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "templates",
+            "{{templateId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "27 DELETE plan",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/plans/{{planId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "plans",
+            "{{planId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "28 DELETE customer",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/customers/{{customerId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "customers",
+            "{{customerId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "36 GET plan semilla",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 200\", () => pm.response.to.have.status(200));\nconst plans = pm.response.json();\npm.collectionVariables.set(\"planSeedId\", plans[0].id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/plans",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "plans"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "37 POST customer para firmar",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const ruc = \"20\" + String(Math.floor(Math.random() * 1e9)).padStart(9, \"0\");\r\npm.request.body.update(JSON.stringify({\r\n  businessName: \"Cliente firma SAC\",\r\n  ruc: ruc,\r\n  representative: \"Luis Rojas\",\r\n  email: \"firma@correo.pe\",\r\n  phone: \"987654321\",\r\n  address: \"Av. Larco 456, Lima\"\r\n}));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 201\", () => pm.response.to.have.status(201));\npm.collectionVariables.set(\"custSignId\", pm.response.json().id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"businessName\": \"Soporte Andino SAC\",\n  \"ruc\": \"{{ruc}}\",\n  \"representative\": \"Ana Torres\",\n  \"email\": \"contacto@soporteandino.pe\",\n  \"phone\": \"987654321\",\n  \"address\": \"Av. Arequipa 123, Lima\"\n}",
+          "options": {
+            "raw": {
+              "language": "text"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/customers",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "customers"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "38 POST contract para firmar",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 201\", () => pm.response.to.have.status(201));\npm.collectionVariables.set(\"signedId\", pm.response.json().id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"customerId\": {{custSignId}},\n  \"planId\": {{planSeedId}},\n  \"startDate\": \"2026-11-01\"\n}",
+          "options": {
+            "raw": {
+              "language": "text"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/contracts",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "contracts"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "39 GET signed-document sin firmar",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 404\", () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/contracts/{{signedId}}/signed-document",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "contracts",
+            "{{signedId}}",
+            "signed-document"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "40 POST upload signed pdf valido",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 200\", () => pm.response.to.have.status(200));\r\npm.test(\"Contrato firmado\", () => {\r\n  const b = pm.response.json();\r\n  pm.expect(b.status).to.eql(\"SIGNED\");\r\n  pm.expect(b.pdfUrl).to.be.a(\"string\").and.not.empty;\r\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "file",
+              "type": "file",
+              "contentType": "application/pdf",
+              "src": [
+                "prueba.pdf"
+              ]
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/contracts/{{signedId}}/upload-signed",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "contracts",
+            "{{signedId}}",
+            "upload-signed"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "41 GET signed-document firmado",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 200\", () => pm.response.to.have.status(200));\r\npm.test(\"Es PDF\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/pdf\"));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/contracts/{{signedId}}/signed-document",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "contracts",
+            "{{signedId}}",
+            "signed-document"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "42 DELETE contract firmado",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 409\", () => pm.response.to.have.status(409));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/contracts/{{signedId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "contracts",
+            "{{signedId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "43 POST plan sin plantilla",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 201\", () => pm.response.to.have.status(201));\npm.collectionVariables.set(\"planNoTplId\", pm.response.json().id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Plan sin plantilla {{$timestamp}}\",\n  \"responseTimeHours\": 24,\n  \"monthlyCost\": 350.0,\n  \"durationMonths\": 12\n}",
+          "options": {
+            "raw": {
+              "language": "text"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/plans",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "plans"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "44 POST contract plan sin plantilla",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 201\", () => pm.response.to.have.status(201));\npm.collectionVariables.set(\"noTplContractId\", pm.response.json().id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"customerId\": {{custSignId}},\n  \"planId\": {{planNoTplId}},\n  \"startDate\": \"2026-11-01\"\n}",
+          "options": {
+            "raw": {
+              "language": "text"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/contracts",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "contracts"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "45 GET pdf sin plantilla",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 404\", () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/contracts/{{noTplContractId}}/pdf",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "contracts",
+            "{{noTplContractId}}",
+            "pdf"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
   "auth": {
     "type": "bearer",
     "bearer": [
@@ -46,1141 +1900,26 @@
     {
       "key": "templateId",
       "value": ""
-    }
-  ],
-  "item": [
-    {
-      "name": "00 OPTIONS preflight Angular",
-      "request": {
-        "auth": {
-          "type": "noauth"
-        },
-        "method": "OPTIONS",
-        "header": [
-          {
-            "key": "Origin",
-            "value": "{{angularOrigin}}"
-          },
-          {
-            "key": "Access-Control-Request-Method",
-            "value": "GET"
-          },
-          {
-            "key": "Access-Control-Request-Headers",
-            "value": "Authorization"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/customers",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "customers"
-          ]
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
-              "pm.test(\"Allows the Angular origin\", () => pm.expect(pm.response.headers.get(\"Access-Control-Allow-Origin\")).to.eql(pm.collectionVariables.get(\"angularOrigin\")));",
-              "pm.test(\"Allows the Authorization header\", () => pm.expect(pm.response.headers.get(\"Access-Control-Allow-Headers\")).to.include(\"Authorization\"));"
-            ]
-          }
-        }
-      ]
     },
     {
-      "name": "00 POST login",
-      "request": {
-        "description": "Usuarios simulados: admin@empresa.pe / admin123, gerente@empresa.pe / gerente123, ventas1@empresa.pe / ventas123.",
-        "auth": {
-          "type": "noauth"
-        },
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/auth/login",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "auth",
-            "login"
-          ]
-        },
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"email\": \"admin@empresa.pe\",\n  \"password\": \"admin123\"\n}"
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
-              "const body = pm.response.json();",
-              "pm.test(\"Returns a token\", () => pm.expect(body.token).to.be.a(\"string\").that.is.not.empty);",
-              "pm.collectionVariables.set(\"token\", body.token);"
-            ]
-          }
-        }
-      ]
+      "key": "planSeedId",
+      "value": ""
     },
     {
-      "name": "01 POST customer (valid)",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/customers",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "customers"
-          ]
-        },
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"businessName\": \"Soporte Andino SAC\",\n  \"ruc\": \"{{ruc}}\",\n  \"representative\": \"Ana Torres\",\n  \"email\": \"contacto@soporteandino.pe\",\n  \"phone\": \"987654321\",\n  \"address\": \"Av. Arequipa 123, Lima\"\n}"
-        }
-      },
-      "event": [
-        {
-          "listen": "prerequest",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.collectionVariables.set(\"ruc\", \"20\" + String(Date.now()).slice(-9));"
-            ]
-          }
-        },
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
-              "const c = pm.response.json();",
-              "pm.test(\"Has id and same RUC\", () => { pm.expect(c.id).to.be.a(\"number\"); pm.expect(c.ruc).to.eql(pm.collectionVariables.get(\"ruc\")); });",
-              "pm.collectionVariables.set(\"customerId\", c.id);"
-            ]
-          }
-        }
-      ]
+      "key": "custSignId",
+      "value": ""
     },
     {
-      "name": "02 POST customer without RUC",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/customers",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "customers"
-          ]
-        },
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"businessName\": \"Sin RUC SAC\"\n}"
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
-              "pm.test(\"Problem detail names the ruc field\", () => { const body = pm.response.json(); pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/problem+json\"); pm.expect(body.status).to.eql(400); pm.expect(body.title).to.eql(\"Bad Request\"); pm.expect(body.detail).to.be.a(\"string\").that.is.not.empty; pm.expect(body.errors).to.have.property(\"ruc\"); });"
-            ]
-          }
-        }
-      ]
+      "key": "signedId",
+      "value": ""
     },
     {
-      "name": "03 POST customer duplicated RUC",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/customers",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "customers"
-          ]
-        },
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"businessName\": \"Soporte Andino SAC\",\n  \"ruc\": \"{{ruc}}\",\n  \"representative\": \"Ana Torres\",\n  \"email\": \"contacto@soporteandino.pe\",\n  \"phone\": \"987654321\",\n  \"address\": \"Av. Arequipa 123, Lima\"\n}"
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
-              "pm.test(\"Problem detail\", () => { const body = pm.response.json(); pm.expect(body.status).to.eql(409); pm.expect(body.title).to.eql(\"Conflict\"); pm.expect(body.detail).to.include(\"already exists\"); });"
-            ]
-          }
-        }
-      ]
+      "key": "planNoTplId",
+      "value": ""
     },
     {
-      "name": "04 GET customers",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/customers",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "customers"
-          ]
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
-              "pm.test(\"Returns a list\", () => pm.expect(pm.response.json()).to.be.an(\"array\").that.is.not.empty);"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "04b GET customers by name",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/customers?search=Soporte Andino",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "customers"
-          ],
-          "query": [
-            {
-              "key": "search",
-              "value": "Soporte Andino"
-            }
-          ]
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
-              "pm.test(\"Every name contains the search\", () => { const id = Number(pm.collectionVariables.get(\"customerId\")); const list = pm.response.json(); pm.expect(list.some(c => c.id === id)).to.eql(true); list.forEach(c => pm.expect(c.businessName.toLowerCase()).to.include(\"soporte andino\")); });"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "05 GET customer not found",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/customers/999999",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "customers",
-            "999999"
-          ]
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Status 404\", () => pm.response.to.have.status(404));",
-              "pm.test(\"Problem detail\", () => { const body = pm.response.json(); pm.expect(body.status).to.eql(404); pm.expect(body.title).to.eql(\"Not Found\"); pm.expect(body.detail).to.be.a(\"string\").that.is.not.empty; });"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "06 POST plan (12 months)",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/plans",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "plans"
-          ]
-        },
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"name\": \"Plan Básico {{$timestamp}}\",\n  \"responseTimeHours\": 24,\n  \"monthlyCost\": 350.0,\n  \"durationMonths\": 12\n}"
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
-              "const p = pm.response.json();",
-              "pm.collectionVariables.set(\"planId\", p.id);",
-              "pm.test(\"Keeps duration\", () => pm.expect(p.durationMonths).to.eql(12));"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "07 GET plan by id",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/plans/{{planId}}",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "plans",
-            "{{planId}}"
-          ]
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
-              "pm.test(\"Same plan\", () => pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get(\"planId\"))));"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "08 POST template",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/templates",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "templates"
-          ]
-        },
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"planId\": {{planId}},\n  \"name\": \"Convenio Plan Básico {{$timestamp}}\",\n  \"content\": \"Se acuerda la prestación de soporte técnico según el plan contratado.\"\n}"
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
-              "const t = pm.response.json();",
-              "pm.collectionVariables.set(\"templateId\", t.id);",
-              "pm.test(\"Linked to the plan and dated\", () => { pm.expect(t.planId).to.eql(Number(pm.collectionVariables.get(\"planId\"))); pm.expect(t.updatedAt).to.be.a(\"string\"); });",
-              "pm.test(\"Stores the document head\", () => pm.expect(t.content).to.include(\"# CONTRATO DE PRESTACIÓN DE SERVICIOS DE SOPORTE\"));"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "09 GET templates by plan",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/templates?planId={{planId}}",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "templates"
-          ],
-          "query": [
-            {
-              "key": "planId",
-              "value": "{{planId}}"
-            }
-          ]
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
-              "pm.test(\"Only that plan\", () => { const pid = Number(pm.collectionVariables.get(\"planId\")); const list = pm.response.json(); pm.expect(list).to.not.be.empty; list.forEach(t => pm.expect(t.planId).to.eql(pid)); });"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "10 POST contract (valid)",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/contracts",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "contracts"
-          ]
-        },
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"customerId\": {{customerId}},\n  \"planId\": {{planId}},\n  \"startDate\": \"2026-11-01\"\n}"
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
-              "const k = pm.response.json();",
-              "pm.collectionVariables.set(\"contractId\", k.id);",
-              "pm.test(\"Amount copied from plan\", () => pm.expect(Number(k.amount)).to.eql(350));",
-              "pm.test(\"End date = start + 12 months\", () => pm.expect(k.endDate).to.eql(\"2027-11-01\"));",
-              "pm.test(\"Starts GENERATED without validity\", () => { pm.expect(k.status).to.eql(\"GENERATED\"); pm.expect(k.validity).to.be.null; });"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "11 POST contract with unknown plan",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/contracts",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "contracts"
-          ]
-        },
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"customerId\": {{customerId}},\n  \"planId\": 999999,\n  \"startDate\": \"2026-11-01\"\n}"
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Status 404\", () => pm.response.to.have.status(404));",
-              "pm.test(\"Problem detail\", () => { const body = pm.response.json(); pm.expect(body.status).to.eql(404); pm.expect(body.title).to.eql(\"Not Found\"); pm.expect(body.detail).to.be.a(\"string\").that.is.not.empty; });"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "12 GET contracts by status",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/contracts?status=GENERATED",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "contracts"
-          ],
-          "query": [
-            {
-              "key": "status",
-              "value": "GENERATED"
-            }
-          ]
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
-              "pm.test(\"All GENERATED\", () => { const list = pm.response.json(); pm.expect(list).to.not.be.empty; list.forEach(k => pm.expect(k.status).to.eql(\"GENERATED\")); });"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "13 GET contract by id",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/contracts/{{contractId}}",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "contracts",
-            "{{contractId}}"
-          ]
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
-              "pm.test(\"Includes calculated validity\", () => pm.expect(pm.response.json()).to.have.property(\"validity\"));"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "14 GET customer by id",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/customers/{{customerId}}",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "customers",
-            "{{customerId}}"
-          ]
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
-              "pm.test(\"Same customer\", () => pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get(\"customerId\"))));"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "15 PUT customer",
-      "request": {
-        "method": "PUT",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/customers/{{customerId}}",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "customers",
-            "{{customerId}}"
-          ]
-        },
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"businessName\": \"Soporte Andino Actualizado SAC\",\n  \"ruc\": \"{{ruc}}\",\n  \"representative\": \"Ana Torres\",\n  \"email\": \"contacto@soporteandino.pe\",\n  \"phone\": \"987654321\",\n  \"address\": \"Av. Arequipa 123, Lima\"\n}"
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
-              "pm.test(\"Keeps the same RUC\", () => { const c = pm.response.json(); pm.expect(c.businessName).to.eql(\"Soporte Andino Actualizado SAC\"); pm.expect(c.ruc).to.eql(pm.collectionVariables.get(\"ruc\")); });"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "16 GET plans",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/plans",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "plans"
-          ]
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
-              "pm.test(\"Returns a list\", () => pm.expect(pm.response.json()).to.be.an(\"array\").that.is.not.empty);"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "17 PUT plan",
-      "request": {
-        "method": "PUT",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/plans/{{planId}}",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "plans",
-            "{{planId}}"
-          ]
-        },
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"name\": \"Plan Básico actualizado {{$timestamp}}\",\n  \"responseTimeHours\": 24,\n  \"monthlyCost\": 400.0,\n  \"durationMonths\": 12\n}"
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
-              "pm.test(\"Updates the monthly cost\", () => pm.expect(Number(pm.response.json().monthlyCost)).to.eql(400));"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "18 PUT template",
-      "request": {
-        "method": "PUT",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/templates/{{templateId}}",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "templates",
-            "{{templateId}}"
-          ]
-        },
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"planId\": {{planId}},\n  \"name\": \"Convenio actualizado {{$timestamp}}\",\n  \"content\": \"Se acuerda la prestación de soporte técnico prioritario según el plan contratado.\"\n}"
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
-              "pm.test(\"Keeps the document around the new clause\", () => { const t = pm.response.json(); pm.expect(t.content).to.include(\"# CONTRATO DE PRESTACIÓN DE SERVICIOS DE SOPORTE\"); pm.expect(t.content).to.include(\"soporte técnico prioritario\"); pm.expect(t.content).to.include(\"## 3) Condiciones económicas y forma de pago.\"); });"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "19 GET contracts by validity",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/contracts?validity=ACTIVE",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "contracts"
-          ],
-          "query": [
-            {
-              "key": "validity",
-              "value": "ACTIVE"
-            }
-          ]
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
-              "pm.test(\"Unsigned contract is not active\", () => { const id = Number(pm.collectionVariables.get(\"contractId\")); const list = pm.response.json(); pm.expect(list.find(k => k.id === id)).to.eql(undefined); list.forEach(k => pm.expect(k.validity).to.eql(\"ACTIVE\")); });"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "20 PUT contract",
-      "request": {
-        "method": "PUT",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/contracts/{{contractId}}",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "contracts",
-            "{{contractId}}"
-          ]
-        },
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"customerId\": {{customerId}},\n  \"planId\": {{planId}},\n  \"startDate\": \"2026-12-01\"\n}"
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
-              "const k = pm.response.json();",
-              "pm.test(\"Recalculates amount and end date\", () => { pm.expect(Number(k.amount)).to.eql(400); pm.expect(k.endDate).to.eql(\"2027-12-01\"); });",
-              "pm.test(\"Keeps GENERATED\", () => pm.expect(k.status).to.eql(\"GENERATED\"));"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "21 GET contract pdf",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/contracts/{{contractId}}/pdf",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "contracts",
-            "{{contractId}}",
-            "pdf"
-          ]
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
-              "pm.test(\"Returns a PDF\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/pdf\"));"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "22 POST upload signed not pdf",
-      "request": {
-        "method": "POST",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/contracts/{{contractId}}/upload-signed",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "contracts",
-            "{{contractId}}",
-            "upload-signed"
-          ]
-        },
-        "body": {
-          "mode": "formdata",
-          "formdata": [
-            {
-              "key": "file",
-              "value": "esto no es un pdf",
-              "contentType": "text/plain",
-              "type": "text"
-            }
-          ]
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Status 415\", () => pm.response.to.have.status(415));",
-              "pm.test(\"Problem detail\", () => { const body = pm.response.json(); pm.expect(body.status).to.eql(415); pm.expect(body.title).to.eql(\"Unsupported Media Type\"); pm.expect(body.detail).to.include(\"PDF\"); });"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "23 DELETE customer in use",
-      "request": {
-        "method": "DELETE",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/customers/{{customerId}}",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "customers",
-            "{{customerId}}"
-          ]
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
-              "pm.test(\"Problem detail\", () => { const body = pm.response.json(); pm.expect(body.status).to.eql(409); pm.expect(body.title).to.eql(\"Conflict\"); pm.expect(body.detail).to.include(\"has contracts\"); });"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "24 DELETE plan in use",
-      "request": {
-        "method": "DELETE",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/plans/{{planId}}",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "plans",
-            "{{planId}}"
-          ]
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
-              "pm.test(\"Problem detail\", () => { const body = pm.response.json(); pm.expect(body.status).to.eql(409); pm.expect(body.title).to.eql(\"Conflict\"); pm.expect(body.detail).to.include(\"used by\"); });"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "25 DELETE contract",
-      "request": {
-        "method": "DELETE",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/contracts/{{contractId}}",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "contracts",
-            "{{contractId}}"
-          ]
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "26 DELETE template",
-      "request": {
-        "method": "DELETE",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/templates/{{templateId}}",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "templates",
-            "{{templateId}}"
-          ]
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "27 DELETE plan",
-      "request": {
-        "method": "DELETE",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/plans/{{planId}}",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "plans",
-            "{{planId}}"
-          ]
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "28 DELETE customer",
-      "request": {
-        "method": "DELETE",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/customers/{{customerId}}",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "customers",
-            "{{customerId}}"
-          ]
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
-            ]
-          }
-        }
-      ]
+      "key": "noTplContractId",
+      "value": ""
     }
   ]
 }
