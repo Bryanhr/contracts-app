@@ -73,6 +73,9 @@ public class ContractServiceImpl implements ContractService {
     public void delete(Long id) {
         Contract contract = contracts.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Contract " + id + " not found"));
+        if (contract.getStatus() == ContractStatus.SIGNED) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "A signed contract cannot be deleted");
+        }
         contracts.delete(contract);
     }
 }
