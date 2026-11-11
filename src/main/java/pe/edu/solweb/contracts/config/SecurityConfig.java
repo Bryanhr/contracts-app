@@ -66,7 +66,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(errors -> errors.authenticationEntryPoint(entryPoint))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/login", "/api/v1/users").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/plans", "/api/v1/plans/*", "/api/v1/templates").permitAll()
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated())
