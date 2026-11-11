@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "43ef0e28-c4b0-479a-bbca-173a6f8cad1d",
     "name": "Contracts API - Grupo 6",
-    "description": "Ejecutar en orden. La primera petición comprueba CORS para Angular en http://localhost:4200. Luego el login guarda el JWT. Clientes, contratos y las escrituras lo envían en Authorization. GET de planes y plantillas es público.",
+    "description": "Ejecutar en orden. La primera petición comprueba CORS para Angular en http://localhost:4200. Luego el login guarda el JWT. Clientes, contratos y las escrituras lo envían en Authorization. Son públicos el login, POST /api/v1/users y GET de planes y plantillas.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "27907028"
   },
@@ -66,6 +66,7 @@
               "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
               "const body = pm.response.json();",
               "pm.test(\"Returns a token\", () => pm.expect(body.token).to.be.a(\"string\").that.is.not.empty);",
+              "pm.test(\"Returns an expiration\", () => pm.expect(body.expiresAt).to.be.a(\"string\").that.is.not.empty);",
               "pm.collectionVariables.set(\"token\", body.token);"
             ]
           }
@@ -98,7 +99,213 @@
             "login"
           ]
         },
-        "description": "Usuarios simulados: admin@empresa.pe / admin123, gerente@empresa.pe / gerente123, ventas1@empresa.pe / ventas123."
+        "description": "Usuarios de la tabla: admin@empresa.pe / admin123, gerente@empresa.pe / gerente123, ventas1@empresa.pe / ventas123."
+      },
+      "response": []
+    },
+    {
+      "name": "00b POST user",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.set(\"newUserEmail\", \"nuevo.\" + Date.now() + \"@empresa.pe\");",
+              "pm.collectionVariables.set(\"newUserPassword\", \"clave1234\");"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+              "const body = pm.response.json();",
+              "pm.test(\"Returns the account without the password\", () => {",
+              "    pm.expect(body.id).to.be.a(\"number\");",
+              "    pm.expect(body.email).to.eql(pm.collectionVariables.get(\"newUserEmail\"));",
+              "    pm.expect(body.role).to.eql(\"SALES\");",
+              "    pm.expect(body.password).to.be.undefined;",
+              "    pm.expect(body.passwordHash).to.be.undefined;",
+              "    pm.expect(JSON.stringify(body)).to.not.include(\"clave1234\");",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Usuario nuevo\",\n  \"email\": \"{{newUserEmail}}\",\n  \"password\": \"{{newUserPassword}}\",\n  \"role\": \"SALES\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/users",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "users"
+          ]
+        },
+        "description": "Crea un usuario sin token. La contraseña se guarda hasheada y la respuesta no la devuelve."
+      },
+      "response": []
+    },
+    {
+      "name": "00c POST user email repetido",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+              "pm.test(\"Conflict names the email\", () => { const body = pm.response.json(); pm.expect(body.status).to.eql(409); pm.expect(body.detail).to.include(pm.collectionVariables.get(\"newUserEmail\")); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Usuario nuevo\",\n  \"email\": \"{{newUserEmail}}\",\n  \"password\": \"{{newUserPassword}}\",\n  \"role\": \"SALES\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/users",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "users"
+          ]
+        },
+        "description": "El mismo alta pública con el correo recién creado. Responde 409."
+      },
+      "response": []
+    },
+    {
+      "name": "00d POST user sin token",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.set(\"publicUserEmail\", \"publico.\" + Date.now() + \"@empresa.pe\");"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+              "pm.test(\"Does not return the password\", () => pm.expect(pm.response.json().password).to.be.undefined);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Sin token\",\n  \"email\": \"{{publicUserEmail}}\",\n  \"password\": \"clave1234\",\n  \"role\": \"SALES\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/users",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "users"
+          ]
+        },
+        "description": "Alta pública: no envía Authorization y responde 201."
+      },
+      "response": []
+    },
+    {
+      "name": "00e POST login usuario nuevo",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"The stored hash matches the password\", () => pm.expect(body.token).to.be.a(\"string\").that.is.not.empty);",
+              "pm.test(\"Returns an expiration\", () => pm.expect(body.expiresAt).to.be.a(\"string\").that.is.not.empty);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{newUserEmail}}\",\n  \"password\": \"{{newUserPassword}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "auth",
+            "login"
+          ]
+        },
+        "description": "Entra con la cuenta recién creada. Comprueba el hash guardado sin cambiar el token de la colección."
       },
       "response": []
     },
@@ -110,14 +317,14 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test(\"Login rechazado\", () => pm.expect([400, 401]).to.include(pm.response.code));"
+              "pm.test(\"Status 401\", () => pm.response.to.have.status(401));"
             ]
           }
         }
       ],
       "request": {
         "auth": {
-          "type": "bearer"
+          "type": "noauth"
         },
         "method": "POST",
         "header": [
@@ -147,7 +354,7 @@
             "login"
           ]
         },
-        "description": "Usuarios simulados: admin@empresa.pe / admin123, gerente@empresa.pe / gerente123, ventas1@empresa.pe / ventas123."
+        "description": "La contraseña no coincide con el hash guardado."
       },
       "response": []
     },
@@ -1856,6 +2063,81 @@
         }
       },
       "response": []
+    },
+    {
+      "name": "36 POST logout",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 204\", () => pm.response.to.have.status(204));",
+              "pm.collectionVariables.set(\"closedToken\", pm.collectionVariables.get(\"token\"));",
+              "pm.collectionVariables.set(\"token\", \"\");"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/auth/logout",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "auth",
+            "logout"
+          ]
+        },
+        "description": "Cierra la sesión del token enviado. Ese token deja de servir."
+      },
+      "response": []
+    },
+    {
+      "name": "46 GET customers token cerrado",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 401\", () => pm.response.to.have.status(401));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{closedToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/customers",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "customers"
+          ]
+        },
+        "description": "El token usado en el logout ya no abre las rutas protegidas."
+      },
+      "response": []
     }
   ],
   "auth": {
@@ -1879,6 +2161,22 @@
     },
     {
       "key": "token",
+      "value": ""
+    },
+    {
+      "key": "closedToken",
+      "value": ""
+    },
+    {
+      "key": "newUserEmail",
+      "value": ""
+    },
+    {
+      "key": "publicUserEmail",
+      "value": ""
+    },
+    {
+      "key": "newUserPassword",
       "value": ""
     },
     {
