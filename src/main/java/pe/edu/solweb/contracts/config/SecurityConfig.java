@@ -5,6 +5,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -16,12 +18,23 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import pe.edu.solweb.contracts.security.JwtAuthenticationFilter;
 import pe.edu.solweb.contracts.security.JwtService;
 import pe.edu.solweb.contracts.security.RestAuthenticationEntryPoint;
+import pe.edu.solweb.contracts.security.RevokedTokens;
 
 import java.util.Arrays;
 import java.util.List;
 
 @Configuration
 public class SecurityConfig {
+
+    @Bean
+    PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    RevokedTokens revokedTokens() {
+        return new RevokedTokens();
+    }
 
     @Bean
     JwtAuthenticationFilter jwtAuthenticationFilter(JwtService tokens, RestAuthenticationEntryPoint entryPoint) {
@@ -53,7 +66,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(errors -> errors.authenticationEntryPoint(entryPoint))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/login", "/api/v1/users").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/plans", "/api/v1/plans/*", "/api/v1/templates").permitAll()
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated())

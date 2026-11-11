@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-// El ingreso no consulta esta tabla.
 @Entity
 @Table(name = "users")
 @Getter
