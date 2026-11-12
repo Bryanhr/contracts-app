@@ -43,6 +43,38 @@ Las tablas se crean solas al arrancar (`spring.jpa.hibernate.ddl-auto=update`). 
 
 Para registrar un contrato solo se envía `{ "customerId", "planId", "startDate" }`. El monto se copia del plan, `endDate` es `startDate + durationMonths`, el estado inicial es `GENERATED` y `validity` se calcula en cada respuesta.
 
+## Plantilla desde cero
+
+Si el `content` de `POST /api/v1/templates` no incluye el texto `# CONTRATO`, no reemplaza la plantilla. Se guarda como una cláusula extra, al final del punto 1 de la plantilla por defecto.
+
+Para armar una plantilla propia, el `content` tiene que incluir `# CONTRATO`. Ese texto se guarda tal cual. Cada línea se interpreta así:
+
+- `# ` y el título: título centrado.
+- `## ` y el nombre de la sección: subtítulo.
+- `N.º ` o `N.° `: número del contrato, centrado.
+- Cualquier otra línea: párrafo. Una línea en blanco no se imprime.
+
+Las marcas `{{ }}` se reemplazan al generar el PDF del contrato. Un `content` de plantilla completa:
+
+```text
+# CONTRATO DE PRESTACIÓN DE SERVICIOS DE SOPORTE
+
+N.º {{numero}}
+
+SERVIT y {{cliente}}, RUC {{ruc}}, firman este contrato el {{fecha_emision}}.
+
+## 1) Servicios del plan.
+{{servicios}}
+
+## 2) Vigencia.
+El servicio va del {{fecha_inicio}} al {{fecha_fin}}, por {{duracion}}.
+
+## 3) Pago.
+{{cliente}} pagará {{costo_mensual}} al mes. El total del periodo es {{total}}.
+```
+
+Otras marcas útiles: `{{plan}}`, `{{tiempo_atencion}}`, `{{representante}}`, `{{direccion}}`, `{{correo}}`, `{{telefono}}` y `{{firmado}}`.
+
 Los errores se devuelven como JSON con `status`, `title` y `detail`. Los 400 incluyen además `errors` con el campo que falló.
 
 ## Estructura
