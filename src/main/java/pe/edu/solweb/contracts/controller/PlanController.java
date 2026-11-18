@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import pe.edu.solweb.contracts.dto.PlanDetailResponse;
 import pe.edu.solweb.contracts.dto.PlanRequest;
 import pe.edu.solweb.contracts.dto.PlanResponse;
 import pe.edu.solweb.contracts.service.PlanService;
@@ -23,7 +24,7 @@ public class PlanController {
     }
 
     @GetMapping("/{id}")
-    public PlanResponse get(@PathVariable Long id) {
+    public PlanDetailResponse get(@PathVariable Long id) {
         return service.get(id);
     }
 

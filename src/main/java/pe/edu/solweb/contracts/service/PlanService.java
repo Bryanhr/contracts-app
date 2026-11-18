@@ -1,5 +1,6 @@
 package pe.edu.solweb.contracts.service;
 
+import pe.edu.solweb.contracts.dto.PlanDetailResponse;
 import pe.edu.solweb.contracts.dto.PlanRequest;
 import pe.edu.solweb.contracts.dto.PlanResponse;
 import pe.edu.solweb.contracts.entity.Plan;
@@ -10,7 +11,7 @@ public interface PlanService {
 
     List<PlanResponse> list();
 
-    PlanResponse get(Long id);
+    PlanDetailResponse get(Long id);
 
     PlanResponse create(PlanRequest request);
 
