@@ -33,7 +33,7 @@ Las tablas se crean solas al arrancar (`spring.jpa.hibernate.ddl-auto=update`). 
 | GET | `/api/v1/customers/{id}` | 200, 404 |
 | POST | `/api/v1/customers` | 201, 400 (faltan datos o el RUC no tiene 11 dígitos), 409 (RUC repetido) |
 | GET | `/api/v1/plans` | 200 |
-| GET | `/api/v1/plans/{id}` | 200, 404 |
+| GET | `/api/v1/plans/{id}` | 200, 404 (incluye `services`) |
 | POST | `/api/v1/plans` | 201, 400, 409 (nombre repetido) |
 | GET | `/api/v1/templates?planId=` | 200 (`planId` es opcional) |
 | POST | `/api/v1/templates` | 201, 400, 404 (el plan no existe), 409 (nombre repetido) |

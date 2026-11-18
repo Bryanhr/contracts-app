@@ -5,12 +5,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import pe.edu.solweb.contracts.dto.PlanDetailResponse;
 import pe.edu.solweb.contracts.dto.PlanRequest;
 import pe.edu.solweb.contracts.dto.PlanResponse;
 import pe.edu.solweb.contracts.entity.Plan;
 import pe.edu.solweb.contracts.mappers.PlanMapper;
 import pe.edu.solweb.contracts.repository.ContractRepository;
 import pe.edu.solweb.contracts.repository.PlanRepository;
+import pe.edu.solweb.contracts.repository.PlanSupportServiceRepository;
 import pe.edu.solweb.contracts.repository.TemplateRepository;
 import pe.edu.solweb.contracts.service.PlanService;
 
@@ -23,6 +25,7 @@ public class PlanServiceImpl implements PlanService {
     private final PlanRepository plans;
     private final ContractRepository contracts;
     private final TemplateRepository templates;
+    private final PlanSupportServiceRepository planSupportServices;
     private final PlanMapper planMapper;
 
     @Override
@@ -33,8 +36,9 @@ public class PlanServiceImpl implements PlanService {
 
     @Override
     @Transactional(readOnly = true)
-    public PlanResponse get(Long id) {
-        return PlanResponse.from(find(id));
+    public PlanDetailResponse get(Long id) {
+        Plan plan = find(id);
+        return PlanDetailResponse.from(plan, planSupportServices.findByPlanId(id));
     }
 
     @Override
