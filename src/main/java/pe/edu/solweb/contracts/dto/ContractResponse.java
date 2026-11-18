@@ -9,7 +9,7 @@ import java.time.LocalDate;
 
 public record ContractResponse(
         Long id,
-        Long customerId, String customerName,
+        Long customerId, String customerName, String customerRepresentative,
         Long planId, String planName,
         LocalDate issueDate, LocalDate startDate, LocalDate endDate,
         BigDecimal amount, ContractStatus status, LocalDate signedDate,
@@ -17,7 +17,7 @@ public record ContractResponse(
 
     public static ContractResponse from(Contract c, LocalDate today) {
         return new ContractResponse(c.getId(),
-                c.getCustomer().getId(), c.getCustomer().getBusinessName(),
+                c.getCustomer().getId(), c.getCustomer().getBusinessName(), c.getCustomer().getRepresentative(),
                 c.getPlan().getId(), c.getPlan().getName(),
                 c.getIssueDate(), c.getStartDate(), c.getEndDate(),
                 c.getAmount(), c.getStatus(), c.getSignedDate(),

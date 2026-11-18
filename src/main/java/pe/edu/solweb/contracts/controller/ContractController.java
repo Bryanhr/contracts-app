@@ -135,8 +135,7 @@ public class ContractController {
             @PathVariable Long id,
             @RequestParam("file") MultipartFile file) {
 
-        Contract contract = contractRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Contrato no encontrado con id: " + id));
+        Contract contract = service.findReadyToSign(id);
 
         if (!"application/pdf".equals(file.getContentType())) {
             throw new ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE,

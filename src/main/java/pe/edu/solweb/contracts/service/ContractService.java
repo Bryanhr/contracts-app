@@ -2,6 +2,7 @@ package pe.edu.solweb.contracts.service;
 
 import pe.edu.solweb.contracts.dto.ContractRequest;
 import pe.edu.solweb.contracts.dto.ContractResponse;
+import pe.edu.solweb.contracts.entity.Contract;
 import pe.edu.solweb.contracts.entity.ContractStatus;
 import pe.edu.solweb.contracts.entity.Validity;
 
@@ -18,4 +19,6 @@ public interface ContractService {
     ContractResponse update(Long id, ContractRequest request);
 
     void delete(Long id);
+
+    Contract findReadyToSign(Long id);
 }
