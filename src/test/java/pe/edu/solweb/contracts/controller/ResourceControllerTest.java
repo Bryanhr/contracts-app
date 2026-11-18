@@ -113,7 +113,7 @@ class ResourceControllerTest {
     }
 
     private static ContractResponse contract() {
-        return new ContractResponse(3L, 5L, "ACME", 1L, "Plan",
+        return new ContractResponse(3L, 5L, "ACME", "Ana Pérez", 1L, "Plan",
                 LocalDate.of(2026, 11, 4), LocalDate.of(2026, 11, 1), LocalDate.of(2027, 11, 1),
                 new BigDecimal("350.00"), ContractStatus.GENERATED, null, null);
     }

@@ -1,0 +1,14 @@
+.git
+.idea
+.vscode
+target
+external-storage-bucket
+postman
+db
+*.iml
+*.iws
+*.ipr
+HELP.md
+README.md
+docker-compose.yml
+mvnw.cmd
