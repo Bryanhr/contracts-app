@@ -1,6 +1,6 @@
 {
   "info": {
-    "_postman_id": "43ef0e28-c4b0-479a-bbca-173a6f8cad1d",
+    "_postman_id": "a18a6db8-d7fd-482b-a61f-cf5fecf9013f",
     "name": "Contracts API - Grupo 6",
     "description": "Ejecutar en orden. La primera petición comprueba CORS para Angular en http://localhost:4200. Luego el login guarda el JWT. Clientes, contratos y las escrituras lo envían en Authorization. Son públicos el login, POST /api/v1/users y GET de planes y plantillas.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
@@ -13,12 +13,12 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
               "pm.test(\"Allows the Angular origin\", () => pm.expect(pm.response.headers.get(\"Access-Control-Allow-Origin\")).to.eql(pm.collectionVariables.get(\"angularOrigin\")));",
               "pm.test(\"Allows the Authorization header\", () => pm.expect(pm.response.headers.get(\"Access-Control-Allow-Headers\")).to.include(\"Authorization\"));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -61,14 +61,14 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
               "const body = pm.response.json();",
               "pm.test(\"Returns a token\", () => pm.expect(body.token).to.be.a(\"string\").that.is.not.empty);",
               "pm.test(\"Returns an expiration\", () => pm.expect(body.expiresAt).to.be.a(\"string\").that.is.not.empty);",
               "pm.collectionVariables.set(\"token\", body.token);"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -109,17 +109,16 @@
         {
           "listen": "prerequest",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.collectionVariables.set(\"newUserEmail\", \"nuevo.\" + Date.now() + \"@empresa.pe\");",
               "pm.collectionVariables.set(\"newUserPassword\", \"clave1234\");"
-            ]
+            ],
+            "type": "text/javascript"
           }
         },
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
               "const body = pm.response.json();",
@@ -131,7 +130,8 @@
               "    pm.expect(body.passwordHash).to.be.undefined;",
               "    pm.expect(JSON.stringify(body)).to.not.include(\"clave1234\");",
               "});"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -171,11 +171,11 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
               "pm.test(\"Conflict names the email\", () => { const body = pm.response.json(); pm.expect(body.status).to.eql(409); pm.expect(body.detail).to.include(pm.collectionVariables.get(\"newUserEmail\")); });"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -215,20 +215,20 @@
         {
           "listen": "prerequest",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.collectionVariables.set(\"publicUserEmail\", \"publico.\" + Date.now() + \"@empresa.pe\");"
-            ]
+            ],
+            "type": "text/javascript"
           }
         },
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
               "pm.test(\"Does not return the password\", () => pm.expect(pm.response.json().password).to.be.undefined);"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -268,13 +268,13 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
               "const body = pm.response.json();",
               "pm.test(\"The stored hash matches the password\", () => pm.expect(body.token).to.be.a(\"string\").that.is.not.empty);",
               "pm.test(\"Returns an expiration\", () => pm.expect(body.expiresAt).to.be.a(\"string\").that.is.not.empty);"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -315,10 +315,10 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 401\", () => pm.response.to.have.status(401));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -364,22 +364,22 @@
         {
           "listen": "prerequest",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.collectionVariables.set(\"ruc\", \"20\" + String(Date.now()).slice(-9));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         },
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
               "const c = pm.response.json();",
               "pm.test(\"Has id and same RUC\", () => { pm.expect(c.id).to.be.a(\"number\"); pm.expect(c.ruc).to.eql(pm.collectionVariables.get(\"ruc\")); });",
               "pm.collectionVariables.set(\"customerId\", c.id);"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -415,11 +415,11 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
               "pm.test(\"Problem detail names the ruc field\", () => { const body = pm.response.json(); pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/problem+json\"); pm.expect(body.status).to.eql(400); pm.expect(body.title).to.eql(\"Bad Request\"); pm.expect(body.detail).to.be.a(\"string\").that.is.not.empty; pm.expect(body.errors).to.have.property(\"ruc\"); });"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -455,11 +455,11 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
               "pm.test(\"Problem detail\", () => { const body = pm.response.json(); pm.expect(body.status).to.eql(409); pm.expect(body.title).to.eql(\"Conflict\"); pm.expect(body.detail).to.include(\"already exists\"); });"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -495,11 +495,11 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
               "pm.test(\"Returns a list\", () => pm.expect(pm.response.json()).to.be.an(\"array\").that.is.not.empty);"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -526,11 +526,11 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
               "pm.test(\"Every name contains the search\", () => { const id = Number(pm.collectionVariables.get(\"customerId\")); const list = pm.response.json(); pm.expect(list.some(c => c.id === id)).to.eql(true); list.forEach(c => pm.expect(c.businessName.toLowerCase()).to.include(\"soporte andino\")); });"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -563,11 +563,11 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 404\", () => pm.response.to.have.status(404));",
               "pm.test(\"Problem detail\", () => { const body = pm.response.json(); pm.expect(body.status).to.eql(404); pm.expect(body.title).to.eql(\"Not Found\"); pm.expect(body.detail).to.be.a(\"string\").that.is.not.empty; });"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -595,13 +595,13 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
               "const p = pm.response.json();",
               "pm.collectionVariables.set(\"planId\", p.id);",
               "pm.test(\"Keeps duration\", () => pm.expect(p.durationMonths).to.eql(12));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -637,11 +637,11 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
               "pm.test(\"Same plan\", () => pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get(\"planId\"))));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -669,14 +669,14 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
               "const t = pm.response.json();",
               "pm.collectionVariables.set(\"templateId\", t.id);",
               "pm.test(\"Linked to the plan and dated\", () => { pm.expect(t.planId).to.eql(Number(pm.collectionVariables.get(\"planId\"))); pm.expect(t.updatedAt).to.be.a(\"string\"); });",
               "pm.test(\"Stores the document head\", () => pm.expect(t.content).to.include(\"# CONTRATO DE PRESTACIÓN DE SERVICIOS DE SOPORTE\"));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -712,11 +712,11 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
               "pm.test(\"Only that plan\", () => { const pid = Number(pm.collectionVariables.get(\"planId\")); const list = pm.response.json(); pm.expect(list).to.not.be.empty; list.forEach(t => pm.expect(t.planId).to.eql(pid)); });"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -749,7 +749,6 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
               "const k = pm.response.json();",
@@ -757,7 +756,8 @@
               "pm.test(\"Amount copied from plan\", () => pm.expect(Number(k.amount)).to.eql(350));",
               "pm.test(\"End date = start + 12 months\", () => pm.expect(k.endDate).to.eql(\"2027-11-01\"));",
               "pm.test(\"Starts GENERATED without validity\", () => { pm.expect(k.status).to.eql(\"GENERATED\"); pm.expect(k.validity).to.be.null; });"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -793,11 +793,11 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 404\", () => pm.response.to.have.status(404));",
               "pm.test(\"Problem detail\", () => { const body = pm.response.json(); pm.expect(body.status).to.eql(404); pm.expect(body.title).to.eql(\"Not Found\"); pm.expect(body.detail).to.be.a(\"string\").that.is.not.empty; });"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -833,11 +833,11 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
               "pm.test(\"All GENERATED\", () => { const list = pm.response.json(); pm.expect(list).to.not.be.empty; list.forEach(k => pm.expect(k.status).to.eql(\"GENERATED\")); });"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -870,11 +870,11 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
               "pm.test(\"Includes calculated validity\", () => pm.expect(pm.response.json()).to.have.property(\"validity\"));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -902,11 +902,11 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
               "pm.test(\"Same customer\", () => pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get(\"customerId\"))));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -934,11 +934,11 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
               "pm.test(\"Keeps the same RUC\", () => { const c = pm.response.json(); pm.expect(c.businessName).to.eql(\"Soporte Andino Actualizado SAC\"); pm.expect(c.ruc).to.eql(pm.collectionVariables.get(\"ruc\")); });"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -975,11 +975,11 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
               "pm.test(\"Returns a list\", () => pm.expect(pm.response.json()).to.be.an(\"array\").that.is.not.empty);"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1006,11 +1006,11 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
               "pm.test(\"Updates the monthly cost\", () => pm.expect(Number(pm.response.json().monthlyCost)).to.eql(400));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1047,11 +1047,11 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
               "pm.test(\"Keeps the document around the new clause\", () => { const t = pm.response.json(); pm.expect(t.content).to.include(\"# CONTRATO DE PRESTACIÓN DE SERVICIOS DE SOPORTE\"); pm.expect(t.content).to.include(\"soporte técnico prioritario\"); pm.expect(t.content).to.include(\"## 3) Condiciones económicas y forma de pago.\"); });"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1088,11 +1088,11 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
               "pm.test(\"Unsigned contract is not active\", () => { const id = Number(pm.collectionVariables.get(\"contractId\")); const list = pm.response.json(); pm.expect(list.find(k => k.id === id)).to.eql(undefined); list.forEach(k => pm.expect(k.validity).to.eql(\"ACTIVE\")); });"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1125,13 +1125,13 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
               "const k = pm.response.json();",
               "pm.test(\"Recalculates amount and end date\", () => { pm.expect(Number(k.amount)).to.eql(400); pm.expect(k.endDate).to.eql(\"2027-12-01\"); });",
               "pm.test(\"Keeps GENERATED\", () => pm.expect(k.status).to.eql(\"GENERATED\"));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1168,11 +1168,11 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
               "pm.test(\"Returns a PDF\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/pdf\"));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1201,10 +1201,10 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 415\", () => pm.response.to.have.status(415));\npm.test(\"Problem detail\", () => { const body = pm.response.json(); pm.expect(body.status).to.eql(415); pm.expect(body.title).to.eql(\"Unsupported Media Type\"); });"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1215,12 +1215,10 @@
           "mode": "formdata",
           "formdata": [
             {
+              "contentType": "text/plain",
               "key": "file",
               "type": "file",
-              "contentType": "text/plain",
-              "src": [
-                "prueba (1).txt"
-              ]
+              "src": "prueba (1).txt"
             }
           ]
         },
@@ -1246,10 +1244,10 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 404\", () => pm.response.to.have.status(404));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1278,10 +1276,10 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 404\", () => pm.response.to.have.status(404));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1292,12 +1290,10 @@
           "mode": "formdata",
           "formdata": [
             {
+              "contentType": "text/plain",
               "key": "file",
               "type": "file",
-              "contentType": "text/plain",
-              "src": [
-                "prueba.pdf"
-              ]
+              "src": "prueba.pdf"
             }
           ]
         },
@@ -1323,10 +1319,10 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 400\", () => pm.response.to.have.status(400));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1368,19 +1364,19 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 404\", () => pm.response.to.have.status(404));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         },
         {
           "listen": "prerequest",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "const ruc = \"20\" + String(Math.floor(Math.random() * 1e9)).padStart(9, \"0\");\r\npm.request.body.update(JSON.stringify({\r\n  businessName: \"Cliente inexistente SAC\",\r\n  ruc: ruc,\r\n  representative: \"Ana Torres\",\r\n  email: \"inexistente@correo.pe\",\r\n  phone: \"987654321\",\r\n  address: \"Av. Arequipa 123, Lima\"\r\n}));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1422,10 +1418,10 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 401\", () => pm.response.to.have.status(401));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1455,10 +1451,10 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 401\", () => pm.response.to.have.status(401));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1468,7 +1464,7 @@
           "bearer": [
             {
               "key": "token",
-              "value": "token.invalido.123",
+              "value": "{{auth_secret_0rtf}}",
               "type": "string"
             }
           ]
@@ -1495,11 +1491,11 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
               "pm.test(\"Problem detail\", () => { const body = pm.response.json(); pm.expect(body.status).to.eql(409); pm.expect(body.title).to.eql(\"Conflict\"); pm.expect(body.detail).to.include(\"has contracts\"); });"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1527,11 +1523,11 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
               "pm.test(\"Problem detail\", () => { const body = pm.response.json(); pm.expect(body.status).to.eql(409); pm.expect(body.title).to.eql(\"Conflict\"); pm.expect(body.detail).to.include(\"used by\"); });"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1559,10 +1555,10 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1590,10 +1586,10 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1621,10 +1617,10 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1652,10 +1648,10 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1683,10 +1679,10 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 200\", () => pm.response.to.have.status(200));\nconst plans = pm.response.json();\npm.collectionVariables.set(\"planSeedId\", plans[0].id);"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1713,19 +1709,19 @@
         {
           "listen": "prerequest",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "const ruc = \"20\" + String(Math.floor(Math.random() * 1e9)).padStart(9, \"0\");\r\npm.request.body.update(JSON.stringify({\r\n  businessName: \"Cliente firma SAC\",\r\n  ruc: ruc,\r\n  representative: \"Luis Rojas\",\r\n  email: \"firma@correo.pe\",\r\n  phone: \"987654321\",\r\n  address: \"Av. Larco 456, Lima\"\r\n}));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         },
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 201\", () => pm.response.to.have.status(201));\npm.collectionVariables.set(\"custSignId\", pm.response.json().id);"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1766,10 +1762,10 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 201\", () => pm.response.to.have.status(201));\npm.collectionVariables.set(\"signedId\", pm.response.json().id);"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1810,10 +1806,10 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 404\", () => pm.response.to.have.status(404));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1842,10 +1838,10 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 200\", () => pm.response.to.have.status(200));\r\npm.test(\"Contrato firmado\", () => {\r\n  const b = pm.response.json();\r\n  pm.expect(b.status).to.eql(\"SIGNED\");\r\n  pm.expect(b.pdfUrl).to.be.a(\"string\").and.not.empty;\r\n});"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1856,12 +1852,10 @@
           "mode": "formdata",
           "formdata": [
             {
+              "contentType": "application/pdf",
               "key": "file",
               "type": "file",
-              "contentType": "application/pdf",
-              "src": [
-                "prueba.pdf"
-              ]
+              "src": "prueba.pdf"
             }
           ]
         },
@@ -1887,10 +1881,10 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 200\", () => pm.response.to.have.status(200));\r\npm.test(\"Es PDF\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/pdf\"));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1914,15 +1908,55 @@
       "response": []
     },
     {
-      "name": "42 DELETE contract firmado",
+      "name": "41b PUT contract firmado",
       "event": [
         {
           "listen": "test",
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test(\"Status 409\", () => pm.response.to.have.status(409));"
+              "pm.test(\"CP-42: PUT de contrato firmado responde 409\", function () {\r\n    pm.response.to.have.status(409);\r\n});"
             ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"customerId\": {{custSignId}},\r\n  \"planId\": {{planSeedId}},\r\n  \"startDate\": \"2026-11-01\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/contracts/3",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "contracts",
+            "3"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "42 DELETE contract firmado",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 409\", () => pm.response.to.have.status(409));"
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1950,10 +1984,10 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 201\", () => pm.response.to.have.status(201));\npm.collectionVariables.set(\"planNoTplId\", pm.response.json().id);"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1994,10 +2028,10 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 201\", () => pm.response.to.have.status(201));\npm.collectionVariables.set(\"noTplContractId\", pm.response.json().id);"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -2038,10 +2072,10 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 404\", () => pm.response.to.have.status(404));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -2070,12 +2104,12 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 204\", () => pm.response.to.have.status(204));",
               "pm.collectionVariables.set(\"closedToken\", pm.collectionVariables.get(\"token\"));",
               "pm.collectionVariables.set(\"token\", \"\");"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -2104,10 +2138,10 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 401\", () => pm.response.to.have.status(401));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -2136,6 +2170,359 @@
           ]
         },
         "description": "El token usado en el logout ya no abre las rutas protegidas."
+      },
+      "response": []
+    },
+    {
+      "name": "POST service-types",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"name\": \"Soporte remoto\" }",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/service-types",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "service-types"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST service-types sin nombre",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\":\"\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/service-types",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "service-types"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST service-types nombre existente",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\":\"Soporte remoto\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/service-types",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "service-types"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST support-services",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\":\"Mesa de ayuda\",\"serviceTypeId\":1,\"unit\":\"tickets\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/support-services",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "support-services"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST support-services id 999999",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\":\"Otro\",\"serviceTypeId\":999999,\"unit\":\"x\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/support-services",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "support-services"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST plan id services",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"supportServiceId\":1,\"monthlyLimit\":10,\"extraCost\":25.00}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/plans/3/services",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "plans",
+            "3",
+            "services"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST plan id services duplicado",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"supportServiceId\":1,\"monthlyLimit\":10,\"extraCost\":25.00}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/plans/3/services",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "plans",
+            "3",
+            "services"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST plan id services mes inexistente",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"supportServiceId\":1,\"monthlyLimit\":-1,\"extraCost\":25.00}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/plans/3/services",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "plans",
+            "3",
+            "services"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET plan id services",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/plans/1/services",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "plans",
+            "1",
+            "services"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "DELETE plan id services",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/plans/3/services/1",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "plans",
+            "3",
+            "services",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET plan id services sin token",
+      "request": {
+        "auth": {
+          "type": "bearer"
+        },
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/plans/1/services",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "plans",
+            "1",
+            "services"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "DELETE support-services",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"supportServiceId\":1,\"monthlyLimit\":10,\"extraCost\":25.00}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/support-services/1",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "support-services",
+            "1"
+          ]
+        }
       },
       "response": []
     }
@@ -2218,6 +2605,10 @@
     {
       "key": "noTplContractId",
       "value": ""
+    },
+    {
+      "key": "auth_secret_0rtf",
+      "secret": true
     }
   ]
 }
