@@ -62,6 +62,11 @@ public class ContractServiceImpl implements ContractService {
     public ContractResponse update(Long id, ContractRequest request) {
         Contract contract = contracts.findWithDetailsById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Contract " + id + " not found"));
+        // ↓↓↓ NUEVO
+        if (contract.getStatus() == ContractStatus.SIGNED) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "A signed contract cannot be modified");
+        }
+        // ↑↑↑ NUEVO
         Customer customer = customerService.find(request.customerId());
         Plan plan = planService.find(request.planId());
         contractMapper.update(contract, request, customer, plan);
