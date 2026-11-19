@@ -11,6 +11,7 @@ import pe.edu.solweb.contracts.entity.Plan;
 import pe.edu.solweb.contracts.mappers.PlanMapper;
 import pe.edu.solweb.contracts.repository.ContractRepository;
 import pe.edu.solweb.contracts.repository.PlanRepository;
+import pe.edu.solweb.contracts.repository.PlanSupportServiceRepository;
 import pe.edu.solweb.contracts.repository.TemplateRepository;
 import pe.edu.solweb.contracts.service.PlanService;
 
@@ -23,6 +24,7 @@ public class PlanServiceImpl implements PlanService {
     private final PlanRepository plans;
     private final ContractRepository contracts;
     private final TemplateRepository templates;
+    private final PlanSupportServiceRepository planServices;
     private final PlanMapper planMapper;
 
     @Override
@@ -63,6 +65,9 @@ public class PlanServiceImpl implements PlanService {
         Plan plan = find(id);
         if (contracts.existsByPlan_Id(id) || templates.existsByPlanId(id)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Plan " + id + " is used by a contract or a template");
+        }
+        if (planServices.existsByPlanId(id)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Plan " + id + " has associated services");
         }
         plans.delete(plan);
     }
