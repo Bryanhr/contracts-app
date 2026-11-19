@@ -1550,6 +1550,671 @@
       "response": []
     },
     {
+      "name": "47 POST plan para servicios",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+              "pm.collectionVariables.set(\"planSvcId\", pm.response.json().id);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/plans",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "plans"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Plan servicios {{$timestamp}}\",\n  \"responseTimeHours\": 8,\n  \"monthlyCost\": 500.0,\n  \"durationMonths\": 6\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "CP-43 POST service-type",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.collectionVariables.set(\"svcTypeName\", \"Tipo prueba \" + Date.now());"
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+              "const t = pm.response.json();",
+              "pm.test(\"Returns id and the same name\", () => { pm.expect(t.id).to.be.a(\"number\"); pm.expect(t.name).to.eql(pm.collectionVariables.get(\"svcTypeName\")); });",
+              "pm.collectionVariables.set(\"svcTypeId\", t.id);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/service-types",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "service-types"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"{{svcTypeName}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "CP-44 POST service-type sin nombre",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+              "pm.test(\"Problem detail names the name field\", () => { const b = pm.response.json(); pm.expect(b.status).to.eql(400); pm.expect(b.errors).to.have.property(\"name\"); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/service-types",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "service-types"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "CP-45 POST service-type nombre repetido",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+              "pm.test(\"Problem detail\", () => { const b = pm.response.json(); pm.expect(b.status).to.eql(409); pm.expect(b.title).to.eql(\"Conflict\"); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/service-types",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "service-types"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"{{svcTypeName}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "CP-46 POST support-service",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+              "const s = pm.response.json();",
+              "pm.test(\"Linked to the type\", () => { pm.expect(s.id).to.be.a(\"number\"); pm.expect(s.serviceTypeId).to.eql(Number(pm.collectionVariables.get(\"svcTypeId\"))); });",
+              "pm.collectionVariables.set(\"supportServiceId\", s.id);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/support-services",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "support-services"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Servicio prueba {{$timestamp}}\",\n  \"serviceTypeId\": {{svcTypeId}},\n  \"unit\": \"tickets\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "CP-47 POST support-service con tipo inexistente",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 404\", () => pm.response.to.have.status(404));",
+              "pm.test(\"Problem detail\", () => { const b = pm.response.json(); pm.expect(b.status).to.eql(404); pm.expect(b.detail).to.be.a(\"string\").that.is.not.empty; });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/support-services",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "support-services"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Servicio sin tipo {{$timestamp}}\",\n  \"serviceTypeId\": 999999,\n  \"unit\": \"tickets\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "CP-48 POST servicio al plan",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+              "pm.test(\"Keeps limit and service\", () => { const l = pm.response.json(); pm.expect(l.supportServiceId).to.eql(Number(pm.collectionVariables.get(\"supportServiceId\"))); pm.expect(l.monthlyLimit).to.eql(10); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/plans/{{planSvcId}}/services",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "plans",
+            "{{planSvcId}}",
+            "services"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"supportServiceId\": {{supportServiceId}},\n  \"monthlyLimit\": 10,\n  \"extraCost\": 25.00\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "CP-49 POST servicio al plan repetido",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+              "pm.test(\"Problem detail\", () => { const b = pm.response.json(); pm.expect(b.status).to.eql(409); pm.expect(b.title).to.eql(\"Conflict\"); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/plans/{{planSvcId}}/services",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "plans",
+            "{{planSvcId}}",
+            "services"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"supportServiceId\": {{supportServiceId}},\n  \"monthlyLimit\": 10,\n  \"extraCost\": 25.00\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "CP-50 POST servicio al plan con limite negativo",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+              "pm.test(\"Problem detail names the limit\", () => { const b = pm.response.json(); pm.expect(b.status).to.eql(400); pm.expect(b.errors).to.have.property(\"monthlyLimit\"); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/plans/{{planSvcId}}/services",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "plans",
+            "{{planSvcId}}",
+            "services"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"supportServiceId\": {{supportServiceId}},\n  \"monthlyLimit\": -1,\n  \"extraCost\": 25.00\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "CP-51 GET servicios del plan",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Lists the associated service\", () => { const id = Number(pm.collectionVariables.get(\"supportServiceId\")); const l = pm.response.json().find(x => x.supportServiceId === id); pm.expect(l).to.not.be.undefined; pm.expect(l.monthlyLimit).to.eql(10); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/plans/{{planSvcId}}/services",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "plans",
+            "{{planSvcId}}",
+            "services"
+          ]
+        }
+      }
+    },
+    {
+      "name": "CP-52 DELETE servicio asociado a un plan",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+              "pm.test(\"Problem detail\", () => { const b = pm.response.json(); pm.expect(b.status).to.eql(409); pm.expect(b.title).to.eql(\"Conflict\"); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/support-services/{{supportServiceId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "support-services",
+            "{{supportServiceId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "CP-53 DELETE plan con servicios asociados",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+              "pm.test(\"Problem detail\", () => { const b = pm.response.json(); pm.expect(b.status).to.eql(409); pm.expect(b.title).to.eql(\"Conflict\"); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/plans/{{planSvcId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "plans",
+            "{{planSvcId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "CP-54 GET servicios del plan sin token",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 401\", () => pm.response.to.have.status(401));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/plans/{{planSvcId}}/services",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "plans",
+            "{{planSvcId}}",
+            "services"
+          ]
+        },
+        "auth": {
+          "type": "noauth"
+        }
+      }
+    },
+    {
+      "name": "CP-55 DELETE servicio del plan",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/plans/{{planSvcId}}/services/{{supportServiceId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "plans",
+            "{{planSvcId}}",
+            "services",
+            "{{supportServiceId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "48 DELETE support-service (limpieza)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/support-services/{{supportServiceId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "support-services",
+            "{{supportServiceId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "49 DELETE service-type (limpieza)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/service-types/{{svcTypeId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "service-types",
+            "{{svcTypeId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "50 DELETE plan para servicios (limpieza)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/plans/{{planSvcId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "plans",
+            "{{planSvcId}}"
+          ]
+        }
+      }
+    },
+    {
       "name": "25 DELETE contract",
       "event": [
         {
@@ -1931,7 +2596,12 @@
       ],
       "request": {
         "method": "PUT",
-        "header": [],
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
         "body": {
           "mode": "raw",
           "raw": "{\r\n  \"customerId\": {{custSignId}},\r\n  \"planId\": {{planSeedId}},\r\n  \"startDate\": \"{{futureStart}}\"\r\n}",
@@ -1942,7 +2612,7 @@
           }
         },
         "url": {
-          "raw": "{{baseUrl}}/api/v1/contracts/3",
+          "raw": "{{baseUrl}}/api/v1/contracts/{{signedId}}",
           "host": [
             "{{baseUrl}}"
           ],
@@ -1950,7 +2620,7 @@
             "api",
             "v1",
             "contracts",
-            "3"
+            "{{signedId}}"
           ]
         }
       },
@@ -2181,359 +2851,6 @@
         "description": "El token usado en el logout ya no abre las rutas protegidas."
       },
       "response": []
-    },
-    {
-      "name": "POST service-types",
-      "request": {
-        "method": "POST",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{ \"name\": \"Soporte remoto\" }",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        },
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/service-types",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "service-types"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "POST service-types sin nombre",
-      "request": {
-        "method": "POST",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{\"name\":\"\"}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        },
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/service-types",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "service-types"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "POST service-types nombre existente",
-      "request": {
-        "method": "POST",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{\"name\":\"Soporte remoto\"}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        },
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/service-types",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "service-types"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "POST support-services",
-      "request": {
-        "method": "POST",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{\"name\":\"Mesa de ayuda\",\"serviceTypeId\":1,\"unit\":\"tickets\"}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        },
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/support-services",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "support-services"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "POST support-services id 999999",
-      "request": {
-        "method": "POST",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{\"name\":\"Otro\",\"serviceTypeId\":999999,\"unit\":\"x\"}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        },
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/support-services",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "support-services"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "POST plan id services",
-      "request": {
-        "method": "POST",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{\"supportServiceId\":1,\"monthlyLimit\":10,\"extraCost\":25.00}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        },
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/plans/3/services",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "plans",
-            "3",
-            "services"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "POST plan id services duplicado",
-      "request": {
-        "method": "POST",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{\"supportServiceId\":1,\"monthlyLimit\":10,\"extraCost\":25.00}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        },
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/plans/3/services",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "plans",
-            "3",
-            "services"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "POST plan id services mes inexistente",
-      "request": {
-        "method": "POST",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{\"supportServiceId\":1,\"monthlyLimit\":-1,\"extraCost\":25.00}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        },
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/plans/3/services",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "plans",
-            "3",
-            "services"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "GET plan id services",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        },
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/plans/1/services",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "plans",
-            "1",
-            "services"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "DELETE plan id services",
-      "request": {
-        "method": "DELETE",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        },
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/plans/3/services/1",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "plans",
-            "3",
-            "services",
-            "1"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "GET plan id services sin token",
-      "request": {
-        "auth": {
-          "type": "bearer"
-        },
-        "method": "GET",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        },
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/plans/1/services",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "plans",
-            "1",
-            "services"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "DELETE support-services",
-      "request": {
-        "method": "DELETE",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{\"supportServiceId\":1,\"monthlyLimit\":10,\"extraCost\":25.00}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        },
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/support-services/1",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "support-services",
-            "1"
-          ]
-        }
-      },
-      "response": []
     }
   ],
   "auth": {
@@ -2622,6 +2939,26 @@
     {
       "key": "futureStart",
       "value": ""
+    },
+    {
+      "key": "planSvcId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "svcTypeId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "svcTypeName",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "supportServiceId",
+      "value": "",
+      "type": "string"
     }
   ]
 }
