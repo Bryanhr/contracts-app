@@ -83,4 +83,16 @@ public class ContractServiceImpl implements ContractService {
         }
         contracts.delete(contract);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Contract findReadyToSign(Long id) {
+        Contract contract = contracts.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Contract " + id + " not found"));
+        if (LocalDate.now().isAfter(contract.getStartDate())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "The contract start date has already passed; update the start date before uploading the signed document");
+        }
+        return contract;
+    }
 }

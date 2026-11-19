@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import pe.edu.solweb.contracts.dto.PlanDetailResponse;
 import pe.edu.solweb.contracts.dto.PlanRequest;
 import pe.edu.solweb.contracts.dto.PlanResponse;
 import pe.edu.solweb.contracts.entity.Plan;
@@ -24,7 +25,7 @@ public class PlanServiceImpl implements PlanService {
     private final PlanRepository plans;
     private final ContractRepository contracts;
     private final TemplateRepository templates;
-    private final PlanSupportServiceRepository planServices;
+    private final PlanSupportServiceRepository planSupportServices;
     private final PlanMapper planMapper;
 
     @Override
@@ -35,8 +36,9 @@ public class PlanServiceImpl implements PlanService {
 
     @Override
     @Transactional(readOnly = true)
-    public PlanResponse get(Long id) {
-        return PlanResponse.from(find(id));
+    public PlanDetailResponse get(Long id) {
+        Plan plan = find(id);
+        return PlanDetailResponse.from(plan, planSupportServices.findByPlanId(id));
     }
 
     @Override
@@ -66,7 +68,7 @@ public class PlanServiceImpl implements PlanService {
         if (contracts.existsByPlan_Id(id) || templates.existsByPlanId(id)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Plan " + id + " is used by a contract or a template");
         }
-        if (planServices.existsByPlanId(id)) {
+        if (planSupportServices.existsByPlanId(id)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Plan " + id + " has associated services");
         }
         plans.delete(plan);

@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @Setter
 public class Template {
 
+    @Column(nullable = false, unique = true)
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -19,7 +20,6 @@ public class Template {
     @JoinColumn(name = "plan_id")
     private Plan plan;
 
-    @Column(nullable = false, unique = true)
     private String name;
 
     @Column(nullable = false, columnDefinition = "TEXT")

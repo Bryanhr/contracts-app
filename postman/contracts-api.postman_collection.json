@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "a18a6db8-d7fd-482b-a61f-cf5fecf9013f",
     "name": "Contracts API - Grupo 6",
-    "description": "Ejecutar en orden. La primera petición comprueba CORS para Angular en http://localhost:4200. Luego el login guarda el JWT. Clientes, contratos y las escrituras lo envían en Authorization. Son públicos el login, POST /api/v1/users y GET de planes y plantillas.",
+    "description": "Ejecutar en orden. La primera petición comprueba CORS para Angular en http://localhost:4200. Luego el login guarda el JWT. Clientes, contratos y las escrituras lo envían en Authorization. Son públicos el login, POST /api/v1/users y GET de planes y plantillas. Subir el firmado exige que la fecha de inicio sea hoy o futura; si ya pasó responde 409.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "27907028"
   },
@@ -747,6 +747,20 @@
       "name": "10 POST contract (valid)",
       "event": [
         {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const start = new Date();",
+              "start.setDate(start.getDate() + 14);",
+              "pm.collectionVariables.set(\"contractStartDate\", start.toISOString().slice(0, 10));",
+              "const end = new Date(start);",
+              "end.setMonth(end.getMonth() + 12);",
+              "pm.collectionVariables.set(\"contractEndDate\", end.toISOString().slice(0, 10));"
+            ]
+          }
+        },
+        {
           "listen": "test",
           "script": {
             "exec": [
@@ -754,7 +768,7 @@
               "const k = pm.response.json();",
               "pm.collectionVariables.set(\"contractId\", k.id);",
               "pm.test(\"Amount copied from plan\", () => pm.expect(Number(k.amount)).to.eql(350));",
-              "pm.test(\"End date = start + 12 months\", () => pm.expect(k.endDate).to.eql(\"2027-11-01\"));",
+              "pm.test(\"End date = start + 12 months\", () => pm.expect(k.endDate).to.eql(pm.collectionVariables.get(\"contractEndDate\")));",
               "pm.test(\"Starts GENERATED without validity\", () => { pm.expect(k.status).to.eql(\"GENERATED\"); pm.expect(k.validity).to.be.null; });"
             ],
             "type": "text/javascript"
@@ -771,7 +785,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"customerId\": {{customerId}},\n  \"planId\": {{planId}},\n  \"startDate\": \"2026-11-01\"\n}"
+          "raw": "{\n  \"customerId\": {{customerId}},\n  \"planId\": {{planId}},\n  \"startDate\": \"{{contractStartDate}}\"\n}"
         },
         "url": {
           "raw": "{{baseUrl}}/api/v1/contracts",
@@ -1123,12 +1137,26 @@
       "name": "20 PUT contract",
       "event": [
         {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const start = new Date();",
+              "start.setDate(start.getDate() + 30);",
+              "pm.collectionVariables.set(\"contractStartDate\", start.toISOString().slice(0, 10));",
+              "const end = new Date(start);",
+              "end.setMonth(end.getMonth() + 12);",
+              "pm.collectionVariables.set(\"contractEndDate\", end.toISOString().slice(0, 10));"
+            ]
+          }
+        },
+        {
           "listen": "test",
           "script": {
             "exec": [
               "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
               "const k = pm.response.json();",
-              "pm.test(\"Recalculates amount and end date\", () => { pm.expect(Number(k.amount)).to.eql(400); pm.expect(k.endDate).to.eql(\"2027-12-01\"); });",
+              "pm.test(\"Recalculates amount and end date\", () => { pm.expect(Number(k.amount)).to.eql(400); pm.expect(k.endDate).to.eql(pm.collectionVariables.get(\"contractEndDate\")); });",
               "pm.test(\"Keeps GENERATED\", () => pm.expect(k.status).to.eql(\"GENERATED\"));"
             ],
             "type": "text/javascript"
@@ -1145,7 +1173,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"customerId\": {{customerId}},\n  \"planId\": {{planId}},\n  \"startDate\": \"2026-12-01\"\n}"
+          "raw": "{\n  \"customerId\": {{customerId}},\n  \"planId\": {{planId}},\n  \"startDate\": \"{{contractStartDate}}\"\n}"
         },
         "url": {
           "raw": "{{baseUrl}}/api/v1/contracts/{{contractId}}",
@@ -1760,6 +1788,17 @@
       "name": "38 POST contract para firmar",
       "event": [
         {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const start = new Date();",
+              "start.setDate(start.getDate() + 7);",
+              "pm.collectionVariables.set(\"signStartDate\", start.toISOString().slice(0, 10));"
+            ]
+          }
+        },
+        {
           "listen": "test",
           "script": {
             "exec": [
@@ -1779,7 +1818,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"customerId\": {{custSignId}},\n  \"planId\": {{planSeedId}},\n  \"startDate\": \"2026-11-01\"\n}",
+          "raw": "{\n  \"customerId\": {{custSignId}},\n  \"planId\": {{planSeedId}},\n  \"startDate\": \"{{signStartDate}}\"\n}",
           "options": {
             "raw": {
               "language": "text"
@@ -1796,7 +1835,111 @@
             "v1",
             "contracts"
           ]
+        },
+        "description": "La fecha de inicio queda en el futuro para poder subir el firmado el mismo día o antes."
+      },
+      "response": []
+    },
+    {
+      "name": "38a POST contract con inicio pasado",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const past = new Date();",
+              "past.setDate(past.getDate() - 3);",
+              "pm.collectionVariables.set(\"lateStartDate\", past.toISOString().slice(0, 10));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+              "pm.collectionVariables.set(\"lateSignId\", pm.response.json().id);"
+            ]
+          }
         }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"customerId\": {{custSignId}},\n  \"planId\": {{planSeedId}},\n  \"startDate\": \"{{lateStartDate}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/contracts",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "contracts"
+          ]
+        },
+        "description": "Contrato con fecha de inicio ya vencida. Sirve para probar el rechazo al subir el firmado."
+      },
+      "response": []
+    },
+    {
+      "name": "38b POST upload signed con inicio pasado",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+              "pm.test(\"Asks to update the start date\", () => {",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.status).to.eql(409);",
+              "  pm.expect(body.detail).to.include(\"start date\");",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "file",
+              "type": "file",
+              "contentType": "application/pdf",
+              "src": [
+                "prueba.pdf"
+              ]
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/contracts/{{lateSignId}}/upload-signed",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "contracts",
+            "{{lateSignId}}",
+            "upload-signed"
+          ]
+        },
+        "description": "Si la fecha de inicio ya pasó, la carga responde 409. Hay que editar el contrato y recalcular las fechas."
       },
       "response": []
     },
@@ -2583,6 +2726,14 @@
       "value": ""
     },
     {
+      "key": "contractStartDate",
+      "value": ""
+    },
+    {
+      "key": "contractEndDate",
+      "value": ""
+    },
+    {
       "key": "templateId",
       "value": ""
     },
@@ -2596,6 +2747,18 @@
     },
     {
       "key": "signedId",
+      "value": ""
+    },
+    {
+      "key": "signStartDate",
+      "value": ""
+    },
+    {
+      "key": "lateSignId",
+      "value": ""
+    },
+    {
+      "key": "lateStartDate",
       "value": ""
     },
     {
