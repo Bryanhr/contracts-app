@@ -6,9 +6,9 @@ import pe.edu.solweb.contracts.entity.SupportService;
 import java.math.BigDecimal;
 
 public record PlanServiceResponse(
-        Long id,
+        Long supportServiceId,
         String name,
-        String type,
+        String serviceType,
         String unit,
         Integer monthlyLimit,
         BigDecimal extraCost) {
@@ -17,7 +17,7 @@ public record PlanServiceResponse(
         SupportService service = link.getSupportService();
         String type = service.getServiceType() == null ? null : service.getServiceType().getName();
         return new PlanServiceResponse(
-                link.getId(),
+                service.getId(),
                 service.getName(),
                 blankToNull(type),
                 blankToNull(service.getUnit()),

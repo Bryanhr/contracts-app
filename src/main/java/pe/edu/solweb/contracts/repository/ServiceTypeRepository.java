@@ -4,4 +4,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import pe.edu.solweb.contracts.entity.ServiceType;
 
 public interface ServiceTypeRepository extends JpaRepository<ServiceType, Long> {
+    boolean existsByNameIgnoreCase(String name);
 }
