@@ -68,6 +68,9 @@ public class PlanServiceImpl implements PlanService {
         if (contracts.existsByPlan_Id(id) || templates.existsByPlanId(id)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Plan " + id + " is used by a contract or a template");
         }
+        if (planSupportServices.existsByPlanId(id)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Plan " + id + " has associated services");
+        }
         plans.delete(plan);
     }
 

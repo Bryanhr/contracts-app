@@ -1,8 +1,8 @@
 {
   "info": {
-    "_postman_id": "43ef0e28-c4b0-479a-bbca-173a6f8cad1d",
+    "_postman_id": "a18a6db8-d7fd-482b-a61f-cf5fecf9013f",
     "name": "Contracts API - Grupo 6",
-    "description": "Ejecutar en orden. La primera petición comprueba CORS para Angular en http://localhost:4200. Luego el login guarda el JWT. Clientes, contratos y las escrituras lo envían en Authorization. Son públicos el login, POST /api/v1/users y GET de planes y plantillas. Subir el firmado exige que la fecha de inicio sea hoy o futura; si ya pasó responde 409.",
+    "description": "Ejecutar en orden. La primera petición comprueba CORS para Angular en http://localhost:4200. Luego el login guarda el JWT. Clientes, contratos y las escrituras lo envían en Authorization. Son públicos el login, POST /api/v1/users y GET de planes y plantillas.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "27907028"
   },
@@ -13,12 +13,12 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
               "pm.test(\"Allows the Angular origin\", () => pm.expect(pm.response.headers.get(\"Access-Control-Allow-Origin\")).to.eql(pm.collectionVariables.get(\"angularOrigin\")));",
               "pm.test(\"Allows the Authorization header\", () => pm.expect(pm.response.headers.get(\"Access-Control-Allow-Headers\")).to.include(\"Authorization\"));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -61,14 +61,14 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
               "const body = pm.response.json();",
               "pm.test(\"Returns a token\", () => pm.expect(body.token).to.be.a(\"string\").that.is.not.empty);",
               "pm.test(\"Returns an expiration\", () => pm.expect(body.expiresAt).to.be.a(\"string\").that.is.not.empty);",
               "pm.collectionVariables.set(\"token\", body.token);"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -109,17 +109,16 @@
         {
           "listen": "prerequest",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.collectionVariables.set(\"newUserEmail\", \"nuevo.\" + Date.now() + \"@empresa.pe\");",
               "pm.collectionVariables.set(\"newUserPassword\", \"clave1234\");"
-            ]
+            ],
+            "type": "text/javascript"
           }
         },
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
               "const body = pm.response.json();",
@@ -131,7 +130,8 @@
               "    pm.expect(body.passwordHash).to.be.undefined;",
               "    pm.expect(JSON.stringify(body)).to.not.include(\"clave1234\");",
               "});"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -171,11 +171,11 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
               "pm.test(\"Conflict names the email\", () => { const body = pm.response.json(); pm.expect(body.status).to.eql(409); pm.expect(body.detail).to.include(pm.collectionVariables.get(\"newUserEmail\")); });"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -215,20 +215,20 @@
         {
           "listen": "prerequest",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.collectionVariables.set(\"publicUserEmail\", \"publico.\" + Date.now() + \"@empresa.pe\");"
-            ]
+            ],
+            "type": "text/javascript"
           }
         },
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
               "pm.test(\"Does not return the password\", () => pm.expect(pm.response.json().password).to.be.undefined);"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -268,13 +268,13 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
               "const body = pm.response.json();",
               "pm.test(\"The stored hash matches the password\", () => pm.expect(body.token).to.be.a(\"string\").that.is.not.empty);",
               "pm.test(\"Returns an expiration\", () => pm.expect(body.expiresAt).to.be.a(\"string\").that.is.not.empty);"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -315,10 +315,10 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 401\", () => pm.response.to.have.status(401));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -364,22 +364,22 @@
         {
           "listen": "prerequest",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.collectionVariables.set(\"ruc\", \"20\" + String(Date.now()).slice(-9));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         },
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
               "const c = pm.response.json();",
               "pm.test(\"Has id and same RUC\", () => { pm.expect(c.id).to.be.a(\"number\"); pm.expect(c.ruc).to.eql(pm.collectionVariables.get(\"ruc\")); });",
               "pm.collectionVariables.set(\"customerId\", c.id);"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -415,11 +415,11 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
               "pm.test(\"Problem detail names the ruc field\", () => { const body = pm.response.json(); pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/problem+json\"); pm.expect(body.status).to.eql(400); pm.expect(body.title).to.eql(\"Bad Request\"); pm.expect(body.detail).to.be.a(\"string\").that.is.not.empty; pm.expect(body.errors).to.have.property(\"ruc\"); });"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -455,11 +455,11 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
               "pm.test(\"Problem detail\", () => { const body = pm.response.json(); pm.expect(body.status).to.eql(409); pm.expect(body.title).to.eql(\"Conflict\"); pm.expect(body.detail).to.include(\"already exists\"); });"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -495,11 +495,11 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
               "pm.test(\"Returns a list\", () => pm.expect(pm.response.json()).to.be.an(\"array\").that.is.not.empty);"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -526,11 +526,11 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
               "pm.test(\"Every name contains the search\", () => { const id = Number(pm.collectionVariables.get(\"customerId\")); const list = pm.response.json(); pm.expect(list.some(c => c.id === id)).to.eql(true); list.forEach(c => pm.expect(c.businessName.toLowerCase()).to.include(\"soporte andino\")); });"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -563,11 +563,11 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 404\", () => pm.response.to.have.status(404));",
               "pm.test(\"Problem detail\", () => { const body = pm.response.json(); pm.expect(body.status).to.eql(404); pm.expect(body.title).to.eql(\"Not Found\"); pm.expect(body.detail).to.be.a(\"string\").that.is.not.empty; });"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -595,13 +595,13 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
               "const p = pm.response.json();",
               "pm.collectionVariables.set(\"planId\", p.id);",
               "pm.test(\"Keeps duration\", () => pm.expect(p.durationMonths).to.eql(12));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -637,11 +637,11 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
               "pm.test(\"Same plan\", () => pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get(\"planId\"))));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -669,14 +669,14 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
               "const t = pm.response.json();",
               "pm.collectionVariables.set(\"templateId\", t.id);",
               "pm.test(\"Linked to the plan and dated\", () => { pm.expect(t.planId).to.eql(Number(pm.collectionVariables.get(\"planId\"))); pm.expect(t.updatedAt).to.be.a(\"string\"); });",
               "pm.test(\"Stores the document head\", () => pm.expect(t.content).to.include(\"# CONTRATO DE PRESTACIÓN DE SERVICIOS DE SOPORTE\"));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -712,11 +712,11 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
               "pm.test(\"Only that plan\", () => { const pid = Number(pm.collectionVariables.get(\"planId\")); const list = pm.response.json(); pm.expect(list).to.not.be.empty; list.forEach(t => pm.expect(t.planId).to.eql(pid)); });"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -747,31 +747,17 @@
       "name": "10 POST contract (valid)",
       "event": [
         {
-          "listen": "prerequest",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "const start = new Date();",
-              "start.setDate(start.getDate() + 14);",
-              "pm.collectionVariables.set(\"contractStartDate\", start.toISOString().slice(0, 10));",
-              "const end = new Date(start);",
-              "end.setMonth(end.getMonth() + 12);",
-              "pm.collectionVariables.set(\"contractEndDate\", end.toISOString().slice(0, 10));"
-            ]
-          }
-        },
-        {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
               "const k = pm.response.json();",
               "pm.collectionVariables.set(\"contractId\", k.id);",
               "pm.test(\"Amount copied from plan\", () => pm.expect(Number(k.amount)).to.eql(350));",
-              "pm.test(\"End date = start + 12 months\", () => pm.expect(k.endDate).to.eql(pm.collectionVariables.get(\"contractEndDate\")));",
+              "pm.test(\"End date = start + 12 months\", () => pm.expect(k.endDate).to.eql(\"2027-11-01\"));",
               "pm.test(\"Starts GENERATED without validity\", () => { pm.expect(k.status).to.eql(\"GENERATED\"); pm.expect(k.validity).to.be.null; });"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -785,7 +771,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"customerId\": {{customerId}},\n  \"planId\": {{planId}},\n  \"startDate\": \"{{contractStartDate}}\"\n}"
+          "raw": "{\n  \"customerId\": {{customerId}},\n  \"planId\": {{planId}},\n  \"startDate\": \"2026-11-01\"\n}"
         },
         "url": {
           "raw": "{{baseUrl}}/api/v1/contracts",
@@ -807,11 +793,11 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 404\", () => pm.response.to.have.status(404));",
               "pm.test(\"Problem detail\", () => { const body = pm.response.json(); pm.expect(body.status).to.eql(404); pm.expect(body.title).to.eql(\"Not Found\"); pm.expect(body.detail).to.be.a(\"string\").that.is.not.empty; });"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -847,11 +833,11 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
               "pm.test(\"All GENERATED\", () => { const list = pm.response.json(); pm.expect(list).to.not.be.empty; list.forEach(k => pm.expect(k.status).to.eql(\"GENERATED\")); });"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -884,11 +870,11 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
               "pm.test(\"Includes calculated validity\", () => pm.expect(pm.response.json()).to.have.property(\"validity\"));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -916,11 +902,11 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
               "pm.test(\"Same customer\", () => pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get(\"customerId\"))));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -948,11 +934,11 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
               "pm.test(\"Keeps the same RUC\", () => { const c = pm.response.json(); pm.expect(c.businessName).to.eql(\"Soporte Andino Actualizado SAC\"); pm.expect(c.ruc).to.eql(pm.collectionVariables.get(\"ruc\")); });"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -989,11 +975,11 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
               "pm.test(\"Returns a list\", () => pm.expect(pm.response.json()).to.be.an(\"array\").that.is.not.empty);"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1020,11 +1006,11 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
               "pm.test(\"Updates the monthly cost\", () => pm.expect(Number(pm.response.json().monthlyCost)).to.eql(400));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1061,11 +1047,11 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
               "pm.test(\"Keeps the document around the new clause\", () => { const t = pm.response.json(); pm.expect(t.content).to.include(\"# CONTRATO DE PRESTACIÓN DE SERVICIOS DE SOPORTE\"); pm.expect(t.content).to.include(\"soporte técnico prioritario\"); pm.expect(t.content).to.include(\"## 3) Condiciones económicas y forma de pago.\"); });"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1102,11 +1088,11 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
               "pm.test(\"Unsigned contract is not active\", () => { const id = Number(pm.collectionVariables.get(\"contractId\")); const list = pm.response.json(); pm.expect(list.find(k => k.id === id)).to.eql(undefined); list.forEach(k => pm.expect(k.validity).to.eql(\"ACTIVE\")); });"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1137,29 +1123,15 @@
       "name": "20 PUT contract",
       "event": [
         {
-          "listen": "prerequest",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "const start = new Date();",
-              "start.setDate(start.getDate() + 30);",
-              "pm.collectionVariables.set(\"contractStartDate\", start.toISOString().slice(0, 10));",
-              "const end = new Date(start);",
-              "end.setMonth(end.getMonth() + 12);",
-              "pm.collectionVariables.set(\"contractEndDate\", end.toISOString().slice(0, 10));"
-            ]
-          }
-        },
-        {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
               "const k = pm.response.json();",
-              "pm.test(\"Recalculates amount and end date\", () => { pm.expect(Number(k.amount)).to.eql(400); pm.expect(k.endDate).to.eql(pm.collectionVariables.get(\"contractEndDate\")); });",
+              "pm.test(\"Recalculates amount and end date\", () => { pm.expect(Number(k.amount)).to.eql(400); pm.expect(k.endDate).to.eql(\"2027-12-01\"); });",
               "pm.test(\"Keeps GENERATED\", () => pm.expect(k.status).to.eql(\"GENERATED\"));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1173,7 +1145,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"customerId\": {{customerId}},\n  \"planId\": {{planId}},\n  \"startDate\": \"{{contractStartDate}}\"\n}"
+          "raw": "{\n  \"customerId\": {{customerId}},\n  \"planId\": {{planId}},\n  \"startDate\": \"2026-12-01\"\n}"
         },
         "url": {
           "raw": "{{baseUrl}}/api/v1/contracts/{{contractId}}",
@@ -1196,11 +1168,11 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
               "pm.test(\"Returns a PDF\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/pdf\"));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1229,10 +1201,10 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 415\", () => pm.response.to.have.status(415));\npm.test(\"Problem detail\", () => { const body = pm.response.json(); pm.expect(body.status).to.eql(415); pm.expect(body.title).to.eql(\"Unsupported Media Type\"); });"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1243,12 +1215,10 @@
           "mode": "formdata",
           "formdata": [
             {
+              "contentType": "text/plain",
               "key": "file",
               "type": "file",
-              "contentType": "text/plain",
-              "src": [
-                "prueba (1).txt"
-              ]
+              "src": "prueba (1).txt"
             }
           ]
         },
@@ -1274,10 +1244,10 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 404\", () => pm.response.to.have.status(404));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1306,10 +1276,10 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 404\", () => pm.response.to.have.status(404));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1320,12 +1290,10 @@
           "mode": "formdata",
           "formdata": [
             {
+              "contentType": "text/plain",
               "key": "file",
               "type": "file",
-              "contentType": "text/plain",
-              "src": [
-                "prueba.pdf"
-              ]
+              "src": "prueba.pdf"
             }
           ]
         },
@@ -1351,10 +1319,10 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 400\", () => pm.response.to.have.status(400));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1396,19 +1364,19 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 404\", () => pm.response.to.have.status(404));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         },
         {
           "listen": "prerequest",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "const ruc = \"20\" + String(Math.floor(Math.random() * 1e9)).padStart(9, \"0\");\r\npm.request.body.update(JSON.stringify({\r\n  businessName: \"Cliente inexistente SAC\",\r\n  ruc: ruc,\r\n  representative: \"Ana Torres\",\r\n  email: \"inexistente@correo.pe\",\r\n  phone: \"987654321\",\r\n  address: \"Av. Arequipa 123, Lima\"\r\n}));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1450,10 +1418,10 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 401\", () => pm.response.to.have.status(401));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1483,10 +1451,10 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 401\", () => pm.response.to.have.status(401));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1496,7 +1464,7 @@
           "bearer": [
             {
               "key": "token",
-              "value": "token.invalido.123",
+              "value": "{{auth_secret_0rtf}}",
               "type": "string"
             }
           ]
@@ -1523,11 +1491,11 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
               "pm.test(\"Problem detail\", () => { const body = pm.response.json(); pm.expect(body.status).to.eql(409); pm.expect(body.title).to.eql(\"Conflict\"); pm.expect(body.detail).to.include(\"has contracts\"); });"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1555,11 +1523,11 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
               "pm.test(\"Problem detail\", () => { const body = pm.response.json(); pm.expect(body.status).to.eql(409); pm.expect(body.title).to.eql(\"Conflict\"); pm.expect(body.detail).to.include(\"used by\"); });"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1582,15 +1550,680 @@
       "response": []
     },
     {
+      "name": "47 POST plan para servicios",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+              "pm.collectionVariables.set(\"planSvcId\", pm.response.json().id);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/plans",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "plans"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Plan servicios {{$timestamp}}\",\n  \"responseTimeHours\": 8,\n  \"monthlyCost\": 500.0,\n  \"durationMonths\": 6\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "CP-43 POST service-type",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.collectionVariables.set(\"svcTypeName\", \"Tipo prueba \" + Date.now());"
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+              "const t = pm.response.json();",
+              "pm.test(\"Returns id and the same name\", () => { pm.expect(t.id).to.be.a(\"number\"); pm.expect(t.name).to.eql(pm.collectionVariables.get(\"svcTypeName\")); });",
+              "pm.collectionVariables.set(\"svcTypeId\", t.id);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/service-types",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "service-types"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"{{svcTypeName}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "CP-44 POST service-type sin nombre",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+              "pm.test(\"Problem detail names the name field\", () => { const b = pm.response.json(); pm.expect(b.status).to.eql(400); pm.expect(b.errors).to.have.property(\"name\"); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/service-types",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "service-types"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "CP-45 POST service-type nombre repetido",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+              "pm.test(\"Problem detail\", () => { const b = pm.response.json(); pm.expect(b.status).to.eql(409); pm.expect(b.title).to.eql(\"Conflict\"); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/service-types",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "service-types"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"{{svcTypeName}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "CP-46 POST support-service",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+              "const s = pm.response.json();",
+              "pm.test(\"Linked to the type\", () => { pm.expect(s.id).to.be.a(\"number\"); pm.expect(s.serviceTypeId).to.eql(Number(pm.collectionVariables.get(\"svcTypeId\"))); });",
+              "pm.collectionVariables.set(\"supportServiceId\", s.id);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/support-services",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "support-services"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Servicio prueba {{$timestamp}}\",\n  \"serviceTypeId\": {{svcTypeId}},\n  \"unit\": \"tickets\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "CP-47 POST support-service con tipo inexistente",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 404\", () => pm.response.to.have.status(404));",
+              "pm.test(\"Problem detail\", () => { const b = pm.response.json(); pm.expect(b.status).to.eql(404); pm.expect(b.detail).to.be.a(\"string\").that.is.not.empty; });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/support-services",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "support-services"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Servicio sin tipo {{$timestamp}}\",\n  \"serviceTypeId\": 999999,\n  \"unit\": \"tickets\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "CP-48 POST servicio al plan",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+              "pm.test(\"Keeps limit and service\", () => { const l = pm.response.json(); pm.expect(l.supportServiceId).to.eql(Number(pm.collectionVariables.get(\"supportServiceId\"))); pm.expect(l.monthlyLimit).to.eql(10); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/plans/{{planSvcId}}/services",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "plans",
+            "{{planSvcId}}",
+            "services"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"supportServiceId\": {{supportServiceId}},\n  \"monthlyLimit\": 10,\n  \"extraCost\": 25.00\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "CP-49 POST servicio al plan repetido",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+              "pm.test(\"Problem detail\", () => { const b = pm.response.json(); pm.expect(b.status).to.eql(409); pm.expect(b.title).to.eql(\"Conflict\"); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/plans/{{planSvcId}}/services",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "plans",
+            "{{planSvcId}}",
+            "services"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"supportServiceId\": {{supportServiceId}},\n  \"monthlyLimit\": 10,\n  \"extraCost\": 25.00\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "CP-50 POST servicio al plan con limite negativo",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+              "pm.test(\"Problem detail names the limit\", () => { const b = pm.response.json(); pm.expect(b.status).to.eql(400); pm.expect(b.errors).to.have.property(\"monthlyLimit\"); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/plans/{{planSvcId}}/services",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "plans",
+            "{{planSvcId}}",
+            "services"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"supportServiceId\": {{supportServiceId}},\n  \"monthlyLimit\": -1,\n  \"extraCost\": 25.00\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "CP-51 GET servicios del plan",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Lists the associated service\", () => { const id = Number(pm.collectionVariables.get(\"supportServiceId\")); const l = pm.response.json().find(x => x.supportServiceId === id); pm.expect(l).to.not.be.undefined; pm.expect(l.monthlyLimit).to.eql(10); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/plans/{{planSvcId}}/services",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "plans",
+            "{{planSvcId}}",
+            "services"
+          ]
+        }
+      }
+    },
+    {
+      "name": "CP-52 DELETE servicio asociado a un plan",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+              "pm.test(\"Problem detail\", () => { const b = pm.response.json(); pm.expect(b.status).to.eql(409); pm.expect(b.title).to.eql(\"Conflict\"); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/support-services/{{supportServiceId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "support-services",
+            "{{supportServiceId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "CP-53 DELETE plan con servicios asociados",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+              "pm.test(\"Problem detail\", () => { const b = pm.response.json(); pm.expect(b.status).to.eql(409); pm.expect(b.title).to.eql(\"Conflict\"); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/plans/{{planSvcId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "plans",
+            "{{planSvcId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "CP-54 GET servicios del plan sin token",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 401\", () => pm.response.to.have.status(401));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/plans/{{planSvcId}}/services",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "plans",
+            "{{planSvcId}}",
+            "services"
+          ]
+        },
+        "auth": {
+          "type": "noauth"
+        }
+      }
+    },
+    {
+      "name": "CP-55 DELETE servicio del plan",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/plans/{{planSvcId}}/services/{{supportServiceId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "plans",
+            "{{planSvcId}}",
+            "services",
+            "{{supportServiceId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "48 DELETE support-service (limpieza)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/support-services/{{supportServiceId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "support-services",
+            "{{supportServiceId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "49 DELETE service-type (limpieza)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/service-types/{{svcTypeId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "service-types",
+            "{{svcTypeId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "50 DELETE plan para servicios (limpieza)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/plans/{{planSvcId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "plans",
+            "{{planSvcId}}"
+          ]
+        }
+      }
+    },
+    {
       "name": "25 DELETE contract",
       "event": [
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1618,10 +2251,10 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1649,10 +2282,10 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1680,10 +2313,10 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 204\", () => pm.response.to.have.status(204));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1711,10 +2344,10 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 200\", () => pm.response.to.have.status(200));\nconst plans = pm.response.json();\npm.collectionVariables.set(\"planSeedId\", plans[0].id);"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1741,19 +2374,19 @@
         {
           "listen": "prerequest",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "const ruc = \"20\" + String(Math.floor(Math.random() * 1e9)).padStart(9, \"0\");\r\npm.request.body.update(JSON.stringify({\r\n  businessName: \"Cliente firma SAC\",\r\n  ruc: ruc,\r\n  representative: \"Luis Rojas\",\r\n  email: \"firma@correo.pe\",\r\n  phone: \"987654321\",\r\n  address: \"Av. Larco 456, Lima\"\r\n}));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         },
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 201\", () => pm.response.to.have.status(201));\npm.collectionVariables.set(\"custSignId\", pm.response.json().id);"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1792,22 +2425,20 @@
       "name": "38 POST contract para firmar",
       "event": [
         {
-          "listen": "prerequest",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "const start = new Date();",
-              "start.setDate(start.getDate() + 7);",
-              "pm.collectionVariables.set(\"signStartDate\", start.toISOString().slice(0, 10));"
-            ]
-          }
-        },
-        {
           "listen": "test",
           "script": {
             "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 201\", () => pm.response.to.have.status(201));\npm.collectionVariables.set(\"signedId\", pm.response.json().id);"
+            ]
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const d = new Date();\r\nd.setDate(d.getDate() + 30);\r\npm.collectionVariables.set(\"futureStart\", d.toISOString().slice(0, 10));"
             ]
           }
         }
@@ -1822,7 +2453,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"customerId\": {{custSignId}},\n  \"planId\": {{planSeedId}},\n  \"startDate\": \"{{signStartDate}}\"\n}",
+          "raw": "{\n  \"customerId\": {{custSignId}},\n  \"planId\": {{planSeedId}},\n  \"startDate\": \"{{futureStart}}\"\n}",
           "options": {
             "raw": {
               "language": "text"
@@ -1839,111 +2470,7 @@
             "v1",
             "contracts"
           ]
-        },
-        "description": "La fecha de inicio queda en el futuro para poder subir el firmado el mismo día o antes."
-      },
-      "response": []
-    },
-    {
-      "name": "38a POST contract con inicio pasado",
-      "event": [
-        {
-          "listen": "prerequest",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "const past = new Date();",
-              "past.setDate(past.getDate() - 3);",
-              "pm.collectionVariables.set(\"lateStartDate\", past.toISOString().slice(0, 10));"
-            ]
-          }
-        },
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
-              "pm.collectionVariables.set(\"lateSignId\", pm.response.json().id);"
-            ]
-          }
         }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"customerId\": {{custSignId}},\n  \"planId\": {{planSeedId}},\n  \"startDate\": \"{{lateStartDate}}\"\n}"
-        },
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/contracts",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "contracts"
-          ]
-        },
-        "description": "Contrato con fecha de inicio ya vencida. Sirve para probar el rechazo al subir el firmado."
-      },
-      "response": []
-    },
-    {
-      "name": "38b POST upload signed con inicio pasado",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
-              "pm.test(\"Asks to update the start date\", () => {",
-              "  const body = pm.response.json();",
-              "  pm.expect(body.status).to.eql(409);",
-              "  pm.expect(body.detail).to.include(\"start date\");",
-              "});"
-            ]
-          }
-        }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [],
-        "body": {
-          "mode": "formdata",
-          "formdata": [
-            {
-              "key": "file",
-              "type": "file",
-              "contentType": "application/pdf",
-              "src": [
-                "prueba.pdf"
-              ]
-            }
-          ]
-        },
-        "url": {
-          "raw": "{{baseUrl}}/api/v1/contracts/{{lateSignId}}/upload-signed",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "v1",
-            "contracts",
-            "{{lateSignId}}",
-            "upload-signed"
-          ]
-        },
-        "description": "Si la fecha de inicio ya pasó, la carga responde 409. Hay que editar el contrato y recalcular las fechas."
       },
       "response": []
     },
@@ -1953,10 +2480,10 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 404\", () => pm.response.to.have.status(404));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1985,10 +2512,10 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 200\", () => pm.response.to.have.status(200));\r\npm.test(\"Contrato firmado\", () => {\r\n  const b = pm.response.json();\r\n  pm.expect(b.status).to.eql(\"SIGNED\");\r\n  pm.expect(b.pdfUrl).to.be.a(\"string\").and.not.empty;\r\n});"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -1999,12 +2526,10 @@
           "mode": "formdata",
           "formdata": [
             {
+              "contentType": "application/pdf",
               "key": "file",
               "type": "file",
-              "contentType": "application/pdf",
-              "src": [
-                "prueba.pdf"
-              ]
+              "src": "prueba.pdf"
             }
           ]
         },
@@ -2030,10 +2555,10 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 200\", () => pm.response.to.have.status(200));\r\npm.test(\"Es PDF\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/pdf\"));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -2057,15 +2582,60 @@
       "response": []
     },
     {
-      "name": "42 DELETE contract firmado",
+      "name": "41b PUT contract firmado",
       "event": [
         {
           "listen": "test",
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test(\"Status 409\", () => pm.response.to.have.status(409));"
+              "pm.test(\"CP-42: PUT de contrato firmado responde 409\", function () {\r\n    pm.response.to.have.status(409);\r\n});"
             ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"customerId\": {{custSignId}},\r\n  \"planId\": {{planSeedId}},\r\n  \"startDate\": \"{{futureStart}}\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/contracts/{{signedId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "contracts",
+            "{{signedId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "42 DELETE contract firmado",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status 409\", () => pm.response.to.have.status(409));"
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -2093,10 +2663,10 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 201\", () => pm.response.to.have.status(201));\npm.collectionVariables.set(\"planNoTplId\", pm.response.json().id);"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -2137,10 +2707,10 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 201\", () => pm.response.to.have.status(201));\npm.collectionVariables.set(\"noTplContractId\", pm.response.json().id);"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -2181,10 +2751,10 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 404\", () => pm.response.to.have.status(404));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -2213,12 +2783,12 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 204\", () => pm.response.to.have.status(204));",
               "pm.collectionVariables.set(\"closedToken\", pm.collectionVariables.get(\"token\"));",
               "pm.collectionVariables.set(\"token\", \"\");"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -2247,10 +2817,10 @@
         {
           "listen": "test",
           "script": {
-            "type": "text/javascript",
             "exec": [
               "pm.test(\"Status 401\", () => pm.response.to.have.status(401));"
-            ]
+            ],
+            "type": "text/javascript"
           }
         }
       ],
@@ -2339,14 +2909,6 @@
       "value": ""
     },
     {
-      "key": "contractStartDate",
-      "value": ""
-    },
-    {
-      "key": "contractEndDate",
-      "value": ""
-    },
-    {
       "key": "templateId",
       "value": ""
     },
@@ -2363,24 +2925,40 @@
       "value": ""
     },
     {
-      "key": "signStartDate",
-      "value": ""
-    },
-    {
-      "key": "lateSignId",
-      "value": ""
-    },
-    {
-      "key": "lateStartDate",
-      "value": ""
-    },
-    {
       "key": "planNoTplId",
       "value": ""
     },
     {
       "key": "noTplContractId",
       "value": ""
+    },
+    {
+      "key": "auth_secret_0rtf",
+      "secret": true
+    },
+    {
+      "key": "futureStart",
+      "value": ""
+    },
+    {
+      "key": "planSvcId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "svcTypeId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "svcTypeName",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "supportServiceId",
+      "value": "",
+      "type": "string"
     }
   ]
 }
